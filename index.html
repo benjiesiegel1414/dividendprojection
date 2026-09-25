@@ -622,6 +622,31 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 }
 @media (prefers-reduced-motion: reduce) { .cover-bar i::after { display: none; } }
 
+
+/* =====================================================================
+   HOMEPAGE TICKER DEMO (fund name flips through a few funds)
+   ===================================================================== */
+.fund-token { transition: transform .2s var(--ease-spring), box-shadow .2s, width .5s var(--ease-out); overflow: hidden; vertical-align: baseline; }
+#fundSym { display: inline-block; }
+.token input.flip-out, #fundSym.flip-out { animation: flipOut .32s cubic-bezier(.55,0,.8,.2) forwards; }
+.token input.flip-in, #fundSym.flip-in { animation: flipIn .5s var(--ease-out) both; }
+@keyframes flipOut { to { transform: translateY(-.55em) rotateX(70deg); opacity: 0; filter: blur(3px); } }
+@keyframes flipIn { from { transform: translateY(.55em) rotateX(-70deg); opacity: 0; filter: blur(3px); } to { transform: none; opacity: 1; filter: none; } }
+.fund-token.demo { box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 0 0 0 rgba(21,163,116,.45); animation: tokenPulse 2.5s var(--ease-out) infinite; }
+@keyframes tokenPulse { 0% { box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 0 0 0 rgba(21,163,116,.4); } 70%, 100% { box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 0 0 .32em rgba(21,163,116,0); } }
+.try-hint {
+  display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 0;
+  font-size: 16px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;
+  opacity: 0; transform: translateY(4px); animation: hintIn .7s var(--ease-out) 1.4s forwards;
+}
+.try-hint button { padding: 0; border: none; background: none; font: inherit; color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline; text-decoration-color: rgba(11,122,85,.35); text-underline-offset: 3px; }
+.try-hint button:hover { text-decoration-color: var(--green); }
+.try-hint svg { color: var(--green-2); flex: 0 0 auto; }
+.try-hint kbd { margin-left: 2px; }
+@keyframes hintIn { to { opacity: 1; transform: none; } }
+@media (max-width: 640px) { .try-hint { font-size: 15px; margin-top: 10px; } .try-hint kbd { display: none; } }
+@media (prefers-reduced-motion: reduce) { .try-hint { opacity: 1; transform: none; } .fund-token.demo { animation: none; } }
+
 /* =====================================================================
    RESPONSIVE
    ===================================================================== */
@@ -711,6 +736,11 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       <span class="w" style="--i:14" id="yrsWord">years.</span>
       <span id="mirror" aria-hidden="true"></span>
     </h1>
+    <p class="try-hint" id="tryHint">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg>
+      <span><button type="button" id="tryHintBtn">Click the ticker</button> to try <span id="fundCount">150+ dividend ETFs</span></span>
+      <kbd>/</kbd>
+    </p>
 
     <!-- ============ RESULT STAGE ============ -->
     <section class="stage" aria-live="polite" aria-label="Your projected income">
@@ -1310,7 +1340,8 @@ function render() {
   renderPeers(o);
   if (typeof renderCovers === 'function') { if (cover.pending) { cover.pending = false; autoPlayCovers(); } else renderCovers(); }
   chartTo(); dotsTo();
-  history.replaceState(null, '', '/?' + stateParams(fund.sym, true).toString());
+  // The bare homepage keeps a clean address until the visitor interacts
+  if (!demo.running && !demo.pristine) history.replaceState(null, '', '/?' + stateParams(fund.sym, true).toString());
   firstRender = false;
 }
 
@@ -1925,6 +1956,84 @@ if ('IntersectionObserver' in window) {
 } else cover.pending = true;
 
 /* =====================================================================
+   HOMEPAGE TICKER DEMO
+   On the bare homepage, the fund in the sentence flips through a few funds
+   (recalculating each time) until the visitor interacts with anything.
+   ===================================================================== */
+// Each stop in the homepage demo: a fund and a starting amount to show with it
+const DEMO_STEPS = [
+  { t: 'SCHD', a: 10000 },
+  { t: 'OVL',  a: 50000 },
+  { t: 'JEPQ', a: 25000 },
+  { t: 'QQQI', a: 100000 },
+  { t: 'VOO',  a: 15000 },
+  { t: 'CHPY', a: 5000 },
+  { t: 'BLOX', a: 75000 }
+];
+const demo = { running: false, timer: null, i: 0, list: [], pristine: !params.has('etf') };
+function markInteracted() {
+  if (!demo.pristine && !demo.running) return;
+  demo.pristine = false;
+  stopTickerDemo();
+  if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
+}
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, markInteracted, { once: true, capture: true }));
+
+function swapFundInPlace(f) {
+  state.fund = f;
+  $('yield').value = +f.yield.toFixed(2);
+  renderFund(); renderPopular(); render();
+}
+function flipTokenTo(f, amount) {
+  const btn = $('fundBtn'), sym = $('fundSym'), amt = $('start');
+  const setAmount = () => { if (amount != null) { amt.value = commas(amount); autosize(amt); } };
+  if (reduceMotion) { sym.textContent = f.sym; setAmount(); swapFundInPlace(f); return; }
+  const w0 = btn.offsetWidth;
+  const amountChanges = amount != null && moneyVal('start') !== amount;
+  [sym, amountChanges ? amt : null].forEach(el => { if (el) { el.classList.remove('flip-in'); el.classList.add('flip-out'); } });
+  setTimeout(() => {
+    sym.textContent = f.sym;
+    setAmount();
+    if (amountChanges) { amt.classList.remove('flip-out'); amt.classList.add('flip-in'); }
+    btn.style.width = 'auto';
+    const w1 = btn.offsetWidth;
+    btn.style.width = w0 + 'px'; btn.offsetWidth;
+    btn.style.width = w1 + 'px';
+    sym.classList.remove('flip-out'); sym.classList.add('flip-in');
+    swapFundInPlace(f);
+    setTimeout(() => { btn.style.width = ''; }, 520);
+  }, 320);
+}
+function startTickerDemo() {
+  if (params.has('etf') || reduceMotion) return;
+  demo.list = DEMO_STEPS.map(st => ({ f: state.funds.find(f => f.sym === st.t), a: st.a })).filter(x => x.f);
+  if (demo.list.length < 2) return;
+  demo.i = Math.max(0, demo.list.findIndex(x => x.f === state.fund));
+  demo.running = true;
+  $('fundBtn').classList.add('demo');
+  const next = () => {
+    if (!demo.running) return;
+    demo.i = (demo.i + 1) % demo.list.length;
+    flipTokenTo(demo.list[demo.i].f, demo.list[demo.i].a);
+    demo.timer = setTimeout(next, 2500);
+  };
+  demo.timer = setTimeout(next, 2500);
+  // Any real interaction stops the demo and keeps whichever fund is showing
+  const stop = () => stopTickerDemo();
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, stop, { once: true, passive: true, capture: true }));
+  addEventListener('scroll', function onS() { if (scrollY > 120) { removeEventListener('scroll', onS); stop(); } }, { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }, { once: true });
+}
+function stopTickerDemo() {
+  if (!demo.running) return;
+  demo.running = false;
+  clearTimeout(demo.timer);
+  $('fundBtn').classList.remove('demo');
+  if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
+}
+$('tryHintBtn').addEventListener('click', () => { stopTickerDemo(); openPicker(); track('fund_search_opened', { source: 'hint' }); });
+
+/* =====================================================================
    ANALYTICS EVENTS (GA4)
    Engagement events, separate from page views. Sent through the Google tag at
    the top of the file (G-PTEX3Z2R9L). If that tag is removed, track() does nothing.
@@ -2015,6 +2124,9 @@ function boot(csv) {
   $('hero').classList.remove('loading');
   sizeAll();
   renderFund(); renderPopular(); render();
+  $('fundCount').textContent = '150+ dividend ETFs';
+  if (matchMedia('(hover: none)').matches) $('tryHintBtn').textContent = 'Tap the ticker';
+  startTickerDemo();
 }
 
 applyParams();
