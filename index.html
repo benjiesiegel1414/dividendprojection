@@ -15,8 +15,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="index, follow">
-<title>Dividend Calculator for Every Dividend ETF | DividendProjection</title>
-<meta name="description" content="See how much monthly income any dividend ETF could pay you. Live yields updated daily, dividend reinvesting, taxes, income goals and year-by-year breakdowns.">
+<title>Dividend Calculator: Project Your Dividend ETF Income | DividendProjection</title>
+<meta name="description" content="Free dividend calculator for 150+ dividend ETFs. Project your monthly dividend income with live yields updated daily, dividend reinvesting (DRIP), taxes and income goals.">
 <script>
   // Each fund page (?etf=TICKER) is its own canonical page; the bare homepage is the root
   (function () {
@@ -26,8 +26,8 @@
     document.head.appendChild(l);
   })();
 </script>
-<meta property="og:title" content="DividendProjection: see what your dividend ETF could pay you">
-<meta property="og:description" content="Live yields, dividend reinvesting, taxes and income goals for 100+ dividend ETFs.">
+<meta property="og:title" content="Dividend Calculator: see what your dividend ETF could pay you">
+<meta property="og:description" content="Free dividend income calculator for 150+ dividend ETFs with live yields, DRIP, taxes and income goals.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DividendProjection">
 <meta property="og:image" content="https://dividendprojection.com/og-image.png">
@@ -37,11 +37,145 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://dividendprojection.com/og-image.png">
 <meta name="twitter:image:alt" content="DividendProjection: What could your dividends pay you?">
-<meta name="twitter:title" content="DividendProjection: see what your dividend ETF could pay you">
-<meta name="twitter:description" content="Live yields, dividend reinvesting, taxes and income goals for 100+ dividend ETFs.">
+<meta name="twitter:title" content="Dividend Calculator: see what your dividend ETF could pay you">
+<meta name="twitter:description" content="Free dividend income calculator for 150+ dividend ETFs with live yields, DRIP, taxes and income goals.">
 <meta property="og:url" content="https://dividendprojection.com/">
 <meta name="theme-color" content="#F2F4F3">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%230B1F1A'/><circle cx='10' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='16' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='16' cy='15.5' r='2.6' fill='%234FD1A5'/><circle cx='22' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='22' cy='15.5' r='2.6' fill='%234FD1A5'/><circle cx='22' cy='8.5' r='3' fill='%2396F2CF'/></svg>">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://dividendprojection.com/#org",
+   "name": "Dividend Empire LLC",
+   "url": "https://dividendprojection.com/",
+   "logo": "https://dividendprojection.com/og-image.png",
+   "email": "Business@TopDividendETFs.com"
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://dividendprojection.com/#website",
+   "name": "DividendProjection",
+   "alternateName": "DividendProjection.com",
+   "url": "https://dividendprojection.com/",
+   "description": "Free dividend calculator for 150+ dividend ETFs. Project your monthly dividend income with live yields updated daily, dividend reinvesting (DRIP), taxes and income goals.",
+   "publisher": {
+    "@id": "https://dividendprojection.com/#org"
+   },
+   "inLanguage": "en-US"
+  },
+  {
+   "@type": "WebApplication",
+   "@id": "https://dividendprojection.com/#app",
+   "name": "DividendProjection Dividend Calculator",
+   "url": "https://dividendprojection.com/",
+   "applicationCategory": "FinanceApplication",
+   "operatingSystem": "Any",
+   "browserRequirements": "Requires JavaScript",
+   "isAccessibleForFree": true,
+   "description": "Free dividend ETF calculator that projects monthly dividend income, reinvested growth, taxes and income goals for 150+ dividend ETFs using live yields.",
+   "featureList": [
+    "Live dividend yields for 150+ ETFs, updated daily",
+    "Dividend reinvestment (DRIP) projections",
+    "Weekly, monthly and quarterly payout schedules",
+    "Tax and account type settings",
+    "Monthly income goals",
+    "Everyday expense coverage comparison",
+    "Year-by-year breakdown"
+   ],
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "publisher": {
+    "@id": "https://dividendprojection.com/#org"
+   },
+   "image": "https://dividendprojection.com/og-image.png"
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://dividendprojection.com/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "How does this dividend calculator work?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Enter a starting amount, a monthly deposit, a dividend ETF and a number of years. The calculator steps through every payout the fund would make, weekly, monthly or quarterly, adding your deposits, paying the dividend, taking out tax if you set a rate, and reinvesting the rest if dividend reinvestment is on. It then shows your projected monthly dividend income, account balance and total dividends collected."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How much do I need to invest to make $1,000 a month in dividends?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Divide the yearly income you want by the fund's dividend yield. $1,000 a month is $12,000 a year, so at a 3% yield you'd need about $400,000 invested, at 7.5% about $160,000, and at 12% about $100,000, before taxes. Higher yields usually come with more risk, and some high-yield funds lose share value over time. Set a monthly goal in the calculator to see exactly when your plan reaches it."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is DRIP, or dividend reinvestment?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "DRIP stands for dividend reinvestment plan. Instead of taking dividends as cash, each payout buys more shares of the fund. Those new shares pay dividends of their own, so your income compounds over time. Turn Reinvest dividends on or off in Plan settings to compare the difference."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is yield on cost?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yield on cost is your yearly dividend income divided by the total amount of money you put in. Because reinvested dividends keep adding shares, your yield on cost can grow well above the fund's current yield the longer you hold."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Do monthly or weekly dividend ETFs pay more than quarterly ones?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Not by themselves. At the same yield, a fund pays the same yearly income whether it pays weekly, monthly or quarterly. More frequent payouts give you smoother cash flow and, with reinvesting on, get your dividends back to work a little sooner, which adds a small amount of extra compounding."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Where does the dividend yield data come from?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Fund data, including yields, expense ratios and payout frequency, comes from the TopDividendETFsPRO.com database, which is reviewed and updated daily. Always confirm current details with the fund issuer before investing."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Why does the calculator assume the share price stays the same?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and many high-yield and option-income ETFs have lost share value over time, so treat every result as an illustration rather than a forecast."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How are dividends taxed in the calculator?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The calculator applies one flat tax rate that you choose, starting at 0%. Real dividend taxes depend on whether distributions are qualified, ordinary income or return of capital, on your income and state, and on your account type. Roth IRA and IRA or 401(k) options skip tax during the projection. This isn't tax advice, so check with a tax professional."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is DividendProjection free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. The calculator is completely free, with no sign-up and no account. It's part of a family of free and premium tools for dividend investors."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -647,6 +781,47 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 @media (max-width: 640px) { .try-hint { font-size: 15px; margin-top: 10px; } .try-hint kbd { display: none; } }
 @media (prefers-reduced-motion: reduce) { .try-hint { opacity: 1; transform: none; } .fund-token.demo { animation: none; } }
 
+
+/* =====================================================================
+   GUIDE + FAQ
+   ===================================================================== */
+.guide { grid-column: span 12; margin-top: 44px; }
+.guide-head { max-width: 760px; margin-bottom: 22px; }
+.guide-eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--green); }
+.guide-head h2 { margin: 0; font-size: clamp(26px, 3.2vw, 36px); font-weight: 600; letter-spacing: -0.045em; line-height: 1.1; }
+.guide-head p:last-child { margin: 12px 0 0; font-size: 17px; color: var(--ink-2); line-height: 1.6; }
+.steps { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
+.step { padding: 22px 22px 20px; }
+.step-n { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--night); color: var(--glow); font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+.step h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.step p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.55; }
+.explain { padding: 22px 24px; margin-bottom: 20px; }
+.explain h3 { margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.explain p { margin: 0; font-size: 15px; color: var(--ink-2); line-height: 1.65; max-width: 90ch; }
+.faq { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow), var(--hi); padding: 22px 24px 10px; }
+.faq > h2 { margin: 0 0 8px; font-size: 20px; font-weight: 600; letter-spacing: -0.03em; }
+.faq-item { border-top: 1px solid var(--line); }
+.faq-item:first-of-type { border-top: none; }
+.faq-item summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.4; }
+.faq-item summary:hover h3 { color: var(--green); }
+.faq-icon { position: relative; flex: 0 0 auto; width: 26px; height: 26px; border-radius: 8px; background: #F0F3F1; }
+.faq-icon::before, .faq-icon::after { content: ''; position: absolute; left: 50%; top: 50%; width: 10px; height: 2px; margin: -1px 0 0 -5px; border-radius: 1px; background: var(--ink-2); transition: transform .3s var(--ease-out); }
+.faq-icon::after { transform: rotate(90deg); }
+.faq-item[open] .faq-icon::after { transform: rotate(0deg); }
+.faq-item p { margin: 0 0 18px; font-size: 15px; color: var(--ink-2); line-height: 1.65; max-width: 80ch; }
+.hero-top { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin: 0 0 22px; }
+.hero-top .eyebrow-live { margin: 0; }
+.hero-h1 { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--green); }
+@media (max-width: 1040px) { .steps { grid-template-columns: minmax(0,1fr); gap: 12px; } }
+@media (max-width: 640px) {
+  .guide { margin-top: 32px; }
+  .faq { padding: 18px 18px 6px; }
+  .explain, .step { padding: 18px; }
+  .hero-top { margin-bottom: 16px; }
+}
+
 /* =====================================================================
    RESPONSIVE
    ===================================================================== */
@@ -720,11 +895,15 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 </header>
 
 <main>
+  <noscript><p class="wrap" style="padding-top:20px">DividendProjection is a free dividend ETF calculator. Please turn on JavaScript to project your dividend income with live yields for 150+ dividend ETFs.</p></noscript>
   <section class="hero wrap loading" id="hero">
     <p class="notice" id="notice" hidden></p>
-    <a class="eyebrow-live" href="https://topdividendetfspro.com/" target="_blank" rel="noopener"><i class="dot-live" aria-hidden="true"></i><span>Data sourced from <b>TopDividendETFsPRO.com</b></span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5h5.5V8M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="hero-top">
+      <h1 class="hero-h1" id="pageH1">Dividend ETF income calculator</h1>
+      <a class="eyebrow-live" href="https://topdividendetfspro.com/" target="_blank" rel="noopener"><i class="dot-live" aria-hidden="true"></i><span>Data sourced from <b>TopDividendETFsPRO.com</b></span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5h5.5V8M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
 
-    <h1 class="sentence">
+    <p class="sentence">
       <span class="w" style="--i:0">If</span> <span class="w" style="--i:1">I</span> <span class="w" style="--i:2">invest</span>
       <span class="w" style="--i:3"><label class="token"><span>$</span><input id="start" type="text" inputmode="numeric" value="10,000" aria-label="Starting amount in dollars"></label></span>
       <span class="w" style="--i:4">today</span> <span class="w" style="--i:5">and</span> <span class="w" style="--i:6">add</span>
@@ -735,7 +914,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       <span class="w" style="--i:13"><label class="token"><input id="years" type="text" inputmode="numeric" value="20" aria-label="Number of years"></label></span>
       <span class="w" style="--i:14" id="yrsWord">years.</span>
       <span id="mirror" aria-hidden="true"></span>
-    </h1>
+    </p>
     <p class="try-hint" id="tryHint">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg>
       <span><button type="button" id="tryHintBtn">Click the ticker</button> to try <span id="fundCount">150+ dividend ETFs</span></span>
@@ -967,6 +1146,64 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
             </table>
           </div>
         </details>
+      </section>
+
+
+      <!-- ============ GUIDE + FAQ (plain HTML so search engines can read it) ============ -->
+      <section class="guide" id="guide" aria-labelledby="guideTitle">
+        <div class="guide-head">
+          <p class="guide-eyebrow">Dividend calculator guide</p>
+          <h2 id="guideTitle">How to project your dividend income</h2>
+          <p>DividendProjection is a free dividend ETF calculator. It shows how much monthly income a dividend ETF could pay you, how your balance grows when dividends are reinvested, and when your income could cover real bills.</p>
+        </div>
+        <ol class="steps">
+          <li class="card step"><span class="step-n">1</span><h3>Enter your amounts</h3><p>Type what you'd invest today and what you'd add each month, right in the sentence at the top of the page.</p></li>
+          <li class="card step"><span class="step-n">2</span><h3>Pick any dividend ETF</h3><p>Choose from 150+ dividend ETFs, from $SCHD and $VOO to $JEPQ, $QQQI and weekly payers, with live yields updated daily.</p></li>
+          <li class="card step"><span class="step-n">3</span><h3>See what it could pay you</h3><p>Get your projected monthly dividend income, balance, every payout year by year, and which everyday bills it could cover.</p></li>
+        </ol>
+        <div class="card explain">
+          <h3>How the projection is calculated</h3>
+          <p>For each payout period, the calculator adds your deposit, pays a dividend equal to your balance times the fund's yield divided by the number of payouts per year, subtracts any tax you've set, and reinvests the rest if dividend reinvestment is on. Dividends grow only by the growth rate you choose, and the share price is held flat so the effect of yield and compounding is easy to see. Read the <a href="/disclaimer">full assumptions</a>.</p>
+        </div>
+        <div class="faq" id="faq">
+          <h2>Dividend calculator FAQ</h2>
+          <details class="faq-item" open>
+            <summary><h3>How does this dividend calculator work?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Enter a starting amount, a monthly deposit, a dividend ETF and a number of years. The calculator steps through every payout the fund would make, weekly, monthly or quarterly, adding your deposits, paying the dividend, taking out tax if you set a rate, and reinvesting the rest if dividend reinvestment is on. It then shows your projected monthly dividend income, account balance and total dividends collected.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>How much do I need to invest to make $1,000 a month in dividends?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Divide the yearly income you want by the fund&#x27;s dividend yield. $1,000 a month is $12,000 a year, so at a 3% yield you&#x27;d need about $400,000 invested, at 7.5% about $160,000, and at 12% about $100,000, before taxes. Higher yields usually come with more risk, and some high-yield funds lose share value over time. Set a monthly goal in the calculator to see exactly when your plan reaches it.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>What is DRIP, or dividend reinvestment?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>DRIP stands for dividend reinvestment plan. Instead of taking dividends as cash, each payout buys more shares of the fund. Those new shares pay dividends of their own, so your income compounds over time. Turn Reinvest dividends on or off in Plan settings to compare the difference.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>What is yield on cost?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Yield on cost is your yearly dividend income divided by the total amount of money you put in. Because reinvested dividends keep adding shares, your yield on cost can grow well above the fund&#x27;s current yield the longer you hold.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>Do monthly or weekly dividend ETFs pay more than quarterly ones?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Not by themselves. At the same yield, a fund pays the same yearly income whether it pays weekly, monthly or quarterly. More frequent payouts give you smoother cash flow and, with reinvesting on, get your dividends back to work a little sooner, which adds a small amount of extra compounding.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>Where does the dividend yield data come from?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Fund data, including yields, expense ratios and payout frequency, comes from the TopDividendETFsPRO.com database, which is reviewed and updated daily. Always confirm current details with the fund issuer before investing.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>Why does the calculator assume the share price stays the same?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and many high-yield and option-income ETFs have lost share value over time, so treat every result as an illustration rather than a forecast.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>How are dividends taxed in the calculator?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>The calculator applies one flat tax rate that you choose, starting at 0%. Real dividend taxes depend on whether distributions are qualified, ordinary income or return of capital, on your income and state, and on your account type. Roth IRA and IRA or 401(k) options skip tax during the projection. This isn&#x27;t tax advice, so check with a tax professional.</p>
+          </details>
+          <details class="faq-item">
+            <summary><h3>Is DividendProjection free?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Yes. The calculator is completely free, with no sign-up and no account. It&#x27;s part of a family of free and premium tools for dividend investors.</p>
+          </details>
+        </div>
       </section>
 
       <section class="pro">
@@ -2107,6 +2344,7 @@ function setMeta(f, isFundPage) {
   $('canonical').href = url;
   document.querySelector('meta[property="og:url"]').content = url;
   document.querySelector('meta[property="og:title"]').content = `${f.sym} dividend income calculator | DividendProjection`;
+  $('pageH1').textContent = `${f.sym} dividend calculator`;
 }
 function boot(csv) {
   state.funds = parseCSV(csv.trim()).slice(1).filter(c => c.length >= 12 && c[0]).map(buildFund).filter(f => f.yield !== null);
