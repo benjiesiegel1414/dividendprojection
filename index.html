@@ -864,7 +864,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 /* =====================================================================
    HERO: SEARCH BAR + EDIT TIP (makes it obvious how to use the tool)
    ===================================================================== */
-.hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 24px; opacity: 0; transform: translateY(6px); animation: hintIn .7s var(--ease-out) 1s forwards; }
+.hero-actions { position: relative; z-index: 20; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 24px; opacity: 0; transform: translateY(6px); animation: hintIn .7s var(--ease-out) 1s forwards; }
 .hero-search { display: flex; align-items: center; gap: 12px; width: min(600px, 100%); height: 58px; padding: 0 16px 0 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line-2); box-shadow: 0 1px 2px rgba(11,31,26,.05), 0 10px 28px -16px rgba(11,31,26,.25); color: var(--ink-3); cursor: text; transition: border-color .2s, box-shadow .2s, transform .2s var(--ease-out); }
 .hero-search:hover { border-color: var(--green-2); box-shadow: 0 1px 2px rgba(11,31,26,.05), 0 14px 32px -16px rgba(11,122,85,.35); transform: translateY(-1px); }
 .hero-search:focus-within { border-color: var(--green-2); box-shadow: 0 0 0 4px rgba(21,163,116,.15); }
@@ -885,6 +885,21 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
   .hero-tip { font-size: 13.5px; }
 }
 @media (prefers-reduced-motion: reduce) { .hero-actions { opacity: 1; transform: none; animation: none; } }
+
+
+.hero-search-wrap { position: relative; width: min(600px, 100%); z-index: 30; }
+.hero-search-wrap .hero-search { width: 100%; }
+.hero-sugg { position: absolute; left: 0; right: 0; top: calc(100% + 8px); margin: 0; padding: 6px; list-style: none; max-height: min(380px, 55vh); overflow-y: auto;
+  background: rgba(255,255,255,.98); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-pop); animation: pop .22s var(--ease-out); }
+.hero-sugg[hidden] { display: none; }
+.hero-sugg li { display: grid; grid-template-columns: 38px 64px 1fr auto; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 12px; cursor: pointer; }
+.hero-sugg li[aria-selected="true"] { background: #EEF3F0; }
+.hero-sugg .h-label { display: block; padding: 8px 12px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); cursor: default; }
+.hero-sugg .s-sym { font-weight: 600; }
+.hero-sugg .s-name { color: var(--ink-2); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-sugg .s-yld { font-weight: 600; font-size: 14px; color: var(--green); }
+.hero-sugg .s-empty { display: block; color: var(--ink-3); cursor: default; padding: 14px 12px; }
+@media (max-width: 640px) { .hero-sugg li { grid-template-columns: 58px 1fr auto; } .hero-sugg .mini-badge { display: none; } }
 
 /* =====================================================================
    RESPONSIVE
@@ -981,11 +996,14 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       <span id="mirror" aria-hidden="true"></span>
     </p>
     <div class="hero-actions">
+      <div class="hero-search-wrap">
       <label class="hero-search" for="heroSearch">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="heroSearch" type="text" autocomplete="off" spellcheck="false" placeholder="Search any dividend ETF, like SCHD, JEPI or QQQI" aria-label="Search for a dividend ETF">
+        <input id="heroSearch" type="text" autocomplete="off" spellcheck="false" placeholder="Type any dividend ETF, like SCHD, JEPI or QQQI" aria-label="Type a dividend ETF ticker or name" role="combobox" aria-expanded="false" aria-controls="heroSugg" aria-autocomplete="list">
         <kbd>/</kbd>
       </label>
+      <ul class="hero-sugg" id="heroSugg" role="listbox" hidden></ul>
+      </div>
       <p class="hero-tip"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.8 2.7a1.6 1.6 0 0 1 2.3 2.3L5.6 12.5l-3 .7.7-3 7.5-7.5Z"/></svg><span><span class="tip-verb">Click</span> any underlined number in the sentence to change it. Your projection updates instantly below.</span></p>
     </div>
 
@@ -2037,13 +2055,48 @@ function move(d) {
 function openPicker(initial = '') { lastFocus = document.activeElement; $('palette').hidden = false; $('q').value = initial; paintList(); $('q').focus(); $('q').setSelectionRange(initial.length, initial.length); document.body.style.overflow = 'hidden'; }
 function closePicker() { $('palette').hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.id !== 'heroSearch') lastFocus.focus(); else $('heroSearch').blur(); }
 $('fundBtn').addEventListener('click', () => openPicker());
-// Big search bar under the sentence opens the fund picker, carrying over whatever was typed
+// Big type-in search box under the sentence, with its own suggestion list
 (() => {
-  const hs = $('heroSearch');
-  const open = (text = '') => { stopTickerDemo(); openPicker(text); hs.value = ''; track('fund_search_opened', { source: 'hero_search' }); };
-  hs.addEventListener('pointerdown', e => { e.preventDefault(); open(); });
-  hs.addEventListener('input', () => open(hs.value));
-  hs.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); open(hs.value); } });
+  const hs = $('heroSearch'), list = $('heroSugg');
+  let hItems = [], hActive = -1, opened = false;
+  const paint = () => {
+    const q = hs.value;
+    hItems = search(q); hActive = hItems.length ? 0 : -1;
+    list.innerHTML = !state.funds.length ? '<li class="s-empty">Loading funds…</li>'
+      : !hItems.length ? `<li class="s-empty">No fund matches "${esc(q)}". Try a ticker like SCHD or JEPI.</li>`
+      : (q.trim() ? '' : '<li class="h-label" aria-hidden="true">Popular dividend ETFs</li>') +
+        hItems.map((f, i) => `<li role="option" id="hopt${i}" data-sym="${esc(f.sym)}" aria-selected="${i === hActive}"><span class="mini-badge">${esc(badgeText(f.sym))}</span><span class="s-sym">${esc(f.sym)}</span><span class="s-name">${esc(f.name)}</span><span class="s-yld">${pct(f.yield)}</span></li>`).join('');
+    list.hidden = false; hs.setAttribute('aria-expanded', 'true');
+    hs.setAttribute('aria-activedescendant', hActive >= 0 ? 'hopt' + hActive : '');
+    if (!opened) { opened = true; stopTickerDemo(); track('fund_search_opened', { source: 'hero_search' }); }
+  };
+  const close = () => { list.hidden = true; hs.setAttribute('aria-expanded', 'false'); opened = false; };
+  const move = d => {
+    if (!hItems.length) return;
+    hActive = (hActive + d + hItems.length) % hItems.length;
+    list.querySelectorAll('li[role=option]').forEach((li, i) => li.setAttribute('aria-selected', String(i === hActive)));
+    hs.setAttribute('aria-activedescendant', 'hopt' + hActive);
+    $('hopt' + hActive)?.scrollIntoView({ block: 'nearest' });
+  };
+  hs.addEventListener('focus', paint);
+  hs.addEventListener('input', paint);
+  hs.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) paint(); else move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Escape') { close(); hs.blur(); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      const exact = state.funds.find(f => f.sym === hs.value.trim().toUpperCase());
+      if (exact) goTo(exact.sym); else if (hItems[hActive]) goTo(hItems[hActive].sym);
+    }
+  });
+  list.addEventListener('mousedown', e => e.preventDefault());   // keep focus in the box while choosing
+  list.addEventListener('click', e => { const li = e.target.closest('li[data-sym]'); if (li) goTo(li.dataset.sym); });
+  list.addEventListener('mousemove', e => {
+    const li = e.target.closest('li[data-sym]'); if (!li) return;
+    const i = [...list.querySelectorAll('li[data-sym]')].indexOf(li); if (i !== hActive) { hActive = i - 1; move(1); }
+  });
+  hs.addEventListener('blur', () => setTimeout(close, 120));
 })();
 
 $('changeFund').addEventListener('click', () => openPicker());
@@ -2066,7 +2119,11 @@ $('sugg').addEventListener('mousemove', e => {
 });
 document.addEventListener('keydown', e => {
   const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
-  if (!typing && $('palette').hidden && (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'))) { e.preventDefault(); openPicker(); }
+  if (!typing && $('palette').hidden && (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'))) {
+    e.preventDefault();
+    const r = $('heroSearch').getBoundingClientRect();
+    if (r.top > 0 && r.bottom < innerHeight) $('heroSearch').focus(); else openPicker();
+  }
 });
 
 /* =====================================================================
@@ -2107,7 +2164,8 @@ $('peersBody').addEventListener('click', e => { const tr = e.target.closest('tr[
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 $('shareBtn').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(location.href); toast('Link copied'); } catch { toast('Copy the address bar to share'); }
+  const link = state.fund ? SITE + '?' + stateParams(state.fund.sym, true).toString() : location.href;
+  try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { toast('Copy the address bar to share'); }
 });
 $('shareImg').addEventListener('click', () => { if (state.fund) makeShareImage(); });
 
@@ -2324,20 +2382,21 @@ $('riskActions').addEventListener('click', e => {
 const DEMO_STEPS = [
   { t: 'SCHD', a: 10000 },
   { t: 'OVL',  a: 50000 },
-  { t: 'JEPQ', a: 25000 },
-  { t: 'QQQI', a: 100000 },
-  { t: 'VOO',  a: 15000 },
-  { t: 'CHPY', a: 5000, y: 3 },   // high-yield funds use short time frames
-  { t: 'BLOX', a: 25000, y: 3 }
+  { t: 'SPYI', a: 25000 },
+  { t: 'KQQQ', a: 15000 },
+  { t: 'VIG',  a: 100000 },
+  { t: 'SGOV', a: 75000 },
+  { t: 'QQQI', a: 30000 }
 ];
 const demo = { running: false, timer: null, i: 0, list: [], pristine: !params.has('etf') };
 function markInteracted(e) {
   if (e && e.target && e.target.closest && e.target.closest('.topnote a, .nav a, .eyebrow-live')) return;
   if (!demo.pristine && !demo.running) return;
-  demo.pristine = false;
   stopTickerDemo();
-  if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
 }
+// The address bar stays https://dividendprojection.com/ until the visitor actually changes a setting
+addEventListener('input', e => { if (!e.target.closest('#heroSearch, #q')) demo.pristine = false; }, true);
+addEventListener('click', e => { if (e.target.closest('.settings button, #dripRow, #riskActions button')) demo.pristine = false; }, true);
 // A real click, key press or typing ends the demo. Scrolling and touch-scrolling don't.
 ['click', 'keydown', 'input'].forEach(ev => addEventListener(ev, markInteracted, { capture: true }));
 
@@ -2409,7 +2468,6 @@ function stopTickerDemo() {
   demo.running = false;
   clearTimeout(demo.timer);
   $('fundBtn').classList.remove('demo');
-  if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
 }
 
 /* =====================================================================
