@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="index, follow">
+<title>Dividend Calculator for Every Dividend ETF | DividendProjection</title>
+<meta name="description" content="See how much monthly income any dividend ETF could pay you. Live yields updated daily, dividend reinvesting, taxes, income goals and year-by-year breakdowns.">
+<link rel="canonical" id="canonical" href="https://dividendprojection.com/">
+<meta property="og:title" content="DividendProjection: see what your dividend ETF could pay you">
+<meta property="og:description" content="Live yields, dividend reinvesting, taxes and income goals for 100+ dividend ETFs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dividendprojection.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F2F4F3">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%230B1F1A'/><circle cx='10' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='16' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='16' cy='15.5' r='2.6' fill='%234FD1A5'/><circle cx='22' cy='22' r='2.2' fill='%234FD1A5'/><circle cx='22' cy='15.5' r='2.6' fill='%234FD1A5'/><circle cx='22' cy='8.5' r='3' fill='%2396F2CF'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Google Analytics 4: paste your Measurement ID. Each fund switch is a full page load, so GA counts it as a page view. -->
+<script>
+  const GA_ID = 'G-XXXXXXXXXX';
+  if (!GA_ID.includes('XXXX')) {
+    const s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ dataLayer.push(arguments); };
+    gtag('js', new Date()); gtag('config', GA_ID);
+  }
+</script>
+
+<style>
+/* =====================================================================
+   TOKENS
+   ===================================================================== */
+:root {
+  --canvas: #F2F4F3;
+  --surface: #FFFFFF;
+  --ink: #0B1F1A;
+  --ink-2: #475953;
+  --ink-3: #85948E;
+  --line: #E1E6E3;
+  --line-2: #CDD6D1;
+  --green: #0B7A55;
+  --green-2: #15A374;
+  --mint: #E2F3EA;
+  --slate: #CBD3CF;
+
+  --night: #0B1F1A;
+  --night-2: #12302A;
+  --night-line: rgba(208, 240, 226, 0.10);
+  --night-text: #EAF3EF;
+  --night-muted: #93ADA4;
+  --glow: #5BE3B4;
+
+  --font: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.36, .64, 1);
+
+  --shadow-sm: 0 1px 2px rgba(11,31,26,.05);
+  --shadow: 0 1px 2px rgba(11,31,26,.04), 0 2px 6px -2px rgba(11,31,26,.05), 0 18px 40px -24px rgba(11,31,26,.18);
+  --shadow-pop: 0 2px 6px rgba(11,31,26,.06), 0 30px 70px -18px rgba(11,31,26,.32);
+  --shadow-stage: 0 2px 4px rgba(11,31,26,.08), 0 40px 80px -30px rgba(11,31,26,.55);
+  --hi: inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 90px; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow-x: hidden;
+}
+/* Faint top wash + fine grain so the page isn't flat grey */
+body::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 900px; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 70% at 15% 0%, rgba(21,163,116,.10), transparent 70%),
+    radial-gradient(50% 60% at 95% 10%, rgba(203,211,207,.55), transparent 70%);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 200; pointer-events: none; opacity: .035; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection { background: rgba(21,163,116,.22); }
+button, input { font: inherit; color: inherit; }
+a { color: var(--green); }
+:focus-visible { outline: 2px solid var(--green-2); outline-offset: 2px; border-radius: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+/* =====================================================================
+   HEADER
+   ===================================================================== */
+.site-header {
+  position: sticky; top: 0; z-index: 60;
+  padding-top: env(safe-area-inset-top, 0px);
+  transition: background .3s, box-shadow .3s, border-color .3s;
+  border-bottom: 1px solid transparent;
+}
+.site-header.scrolled {
+  background: rgba(242,244,243,.78);
+  backdrop-filter: saturate(170%) blur(16px);
+  -webkit-backdrop-filter: saturate(170%) blur(16px);
+  border-bottom-color: var(--line);
+}
+.site-header .wrap { height: 68px; display: flex; align-items: center; gap: 24px; transition: height .3s var(--ease-out); }
+.site-header.scrolled .wrap { height: 58px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 16px; letter-spacing: -0.025em; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--night); display: grid; place-items: center; box-shadow: 0 1px 2px rgba(11,31,26,.2), inset 0 1px 0 rgba(255,255,255,.08); }
+.nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.nav a { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: 14px; padding: 8px 12px; border-radius: 9px; transition: color .15s, background .15s; }
+.nav a:hover { color: var(--ink); background: rgba(11,31,26,.05); }
+.nav .nav-pro { color: #fff; background: var(--ink); margin-left: 6px; box-shadow: 0 1px 2px rgba(11,31,26,.25), inset 0 1px 0 rgba(255,255,255,.1); }
+.nav .nav-pro:hover { background: #17352D; color: #fff; }
+
+/* =====================================================================
+   HERO SENTENCE
+   ===================================================================== */
+.hero { padding-top: 56px; padding-bottom: 32px; }
+.eyebrow-live { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 6px 12px 6px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.eyebrow-live { text-decoration: none; transition: border-color .15s, box-shadow .2s, transform .2s var(--ease-spring); }
+.eyebrow-live:hover { border-color: var(--green-2); color: var(--ink); transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgba(11,122,85,.35); }
+.eyebrow-live b { color: var(--ink); font-weight: 600; }
+.eyebrow-live svg { color: var(--ink-3); transition: transform .2s var(--ease-out), color .15s; }
+.eyebrow-live:hover svg { color: var(--green); transform: translate(1px,-1px); }
+.dot-live { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--green-2); }
+.dot-live::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--green-2); opacity: 0; animation: ping 2.2s var(--ease-out) infinite; }
+@keyframes ping { 0% { transform: scale(.5); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
+
+.notice { margin: 0 0 22px; padding: 12px 16px; border-radius: 12px; background: #FFF5E8; border: 1px solid #F1D5AC; color: #6B4210; font-size: 14px; }
+.notice[hidden] { display: none; }
+
+.sentence {
+  margin: 0; max-width: 1020px;
+  font-size: clamp(30px, 4.6vw, 56px);
+  font-weight: 500; letter-spacing: -0.042em; line-height: 1.24;
+  color: var(--ink-3);
+  text-wrap: balance;
+}
+.sentence .w { display: inline-block; }
+.intro .sentence .w { opacity: 0; transform: translateY(.35em); filter: blur(6px); animation: rise .9s var(--ease-out) forwards; animation-delay: calc(var(--i) * 55ms + 80ms); }
+@keyframes rise { to { opacity: 1; transform: none; filter: blur(0); } }
+
+.token {
+  position: relative;
+  display: inline-flex; align-items: baseline;
+  color: var(--ink); font-weight: 600;
+  white-space: nowrap; cursor: text;
+}
+.token::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: .02em; height: 2px; border-radius: 2px;
+  background: var(--line-2); transform-origin: left; transition: background .2s, transform .35s var(--ease-out);
+}
+.token:hover::after { background: var(--ink-3); }
+.token:focus-within::after { background: var(--green-2); }
+.token input { border: none; background: none; outline: none; padding: 0; font-weight: 600; letter-spacing: -0.042em; color: var(--ink); min-width: 1ch; caret-color: var(--green-2); }
+.fund-token {
+  position: relative;
+  display: inline-flex; align-items: center; gap: .16em;
+  padding: .02em .3em .04em; margin: 0 .03em;
+  background: linear-gradient(180deg, #EAF7F0, #D9F0E4); color: var(--green);
+  border: 1px solid rgba(11,122,85,.18); border-radius: .28em;
+  box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 1px 2px rgba(11,122,85,.12);
+  font-size: inherit; font-weight: 600; letter-spacing: -0.042em; line-height: 1.2;
+  cursor: pointer; transition: transform .2s var(--ease-spring), box-shadow .2s;
+}
+.fund-token:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 6px 16px -6px rgba(11,122,85,.35); }
+.fund-token:active { transform: translateY(0) scale(.98); }
+.fund-token svg { width: .44em; height: .44em; transition: transform .2s; }
+.fund-token:hover svg { transform: translateY(1px); }
+#mirror { position: absolute; left: -9999px; top: 0; visibility: hidden; white-space: pre; font-weight: 600; letter-spacing: -0.042em; }
+
+/* =====================================================================
+   RESULT STAGE (the dark showpiece)
+   ===================================================================== */
+.stage {
+  position: relative; isolation: isolate; overflow: hidden;
+  margin-top: 34px;
+  background: var(--night);
+  color: var(--night-text);
+  border-radius: 30px;
+  box-shadow: var(--shadow-stage);
+}
+.stage::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(70% 90% at 0% 0%, rgba(91,227,180,.13), transparent 60%),
+    radial-gradient(50% 70% at 100% 100%, rgba(91,227,180,.08), transparent 65%);
+}
+.stage::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.05);
+}
+.stage-top {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px;
+  padding: 36px 40px 30px;
+}
+.answer { min-width: 0; }
+.answer-label { margin: 0 0 6px; font-size: 15px; color: var(--night-muted); font-weight: 500; }
+.big-row { display: flex; align-items: baseline; gap: .18em; min-width: 0; }
+.big {
+  margin: 0; font-weight: 600; font-size: 140px; line-height: 1; letter-spacing: -0.06em;
+  color: #fff; white-space: nowrap;
+}
+.per { font-size: 22px; font-weight: 500; color: var(--night-muted); letter-spacing: -0.01em; white-space: nowrap; }
+
+/* Odometer */
+.od { display: inline-flex; }
+.od-ch { display: inline-block; }
+.od-dg { display: inline-block; height: 1em; overflow: hidden; vertical-align: top; }
+.od-st { display: flex; flex-direction: column; transition: transform 1.1s var(--ease-out); will-change: transform; }
+.od-st span { height: 1em; line-height: 1; display: block; }
+
+.answer-sub { margin: 16px 0 0; color: var(--night-muted); font-size: 16px; max-width: 56ch; }
+.answer-sub b { color: var(--night-text); font-weight: 600; }
+
+.meter {
+  display: inline-flex; align-items: center; gap: 12px; margin-top: 20px;
+  padding: 10px 16px 10px 12px; border-radius: 14px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--night-line);
+  font-size: 14px; color: var(--night-muted);
+}
+.meter .dot-live { background: var(--glow); }
+.meter .dot-live::after { border-color: var(--glow); }
+.meter b { color: var(--night-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter .tick { color: var(--glow); font-weight: 600; min-width: 7ch; display: inline-block; }
+
+.kpis { margin: 0; align-self: end; }
+.kpis div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; border-top: 1px solid var(--night-line); }
+.kpis div:first-child { border-top: none; }
+.kpis dt { color: var(--night-muted); font-size: 14px; }
+.kpis dd { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.025em; white-space: nowrap; }
+.kpis dd.glow { color: var(--glow); }
+
+.stage-grid { border-top: 1px solid var(--night-line); padding: 22px 40px 26px; }
+.sg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+.sg-head h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--night-text); }
+.sg-head p { margin: 0; font-size: 13px; color: var(--night-muted); display: flex; align-items: center; gap: 10px; }
+.sg-scale { display: inline-flex; align-items: center; gap: 5px; }
+.sg-scale i { display: inline-block; border-radius: 50%; background: var(--glow); }
+.dots-wrap { position: relative; height: 230px; cursor: crosshair; touch-action: pan-y; }
+#dots { display: block; width: 100%; height: 100%; }
+.dtip {
+  position: absolute; top: 0; pointer-events: none; opacity: 0; transition: opacity .15s;
+  padding: 10px 12px; min-width: 170px; border-radius: 12px; font-size: 13px;
+  background: rgba(18,48,42,.92); border: 1px solid rgba(208,240,226,.16);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,.5);
+}
+.dtip.show { opacity: 1; }
+.dtip b { display: block; margin-bottom: 4px; font-weight: 600; }
+.dtip div { display: flex; justify-content: space-between; gap: 14px; color: var(--night-muted); line-height: 1.7; }
+.dtip div span:last-child { color: var(--night-text); font-weight: 600; }
+
+.stage-actions { display: flex; gap: 10px; flex-wrap: wrap; padding: 0 40px 30px; }
+.btn-night {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 11px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(208,240,226,.14); color: var(--night-text);
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s, transform .15s var(--ease-spring);
+}
+.btn-night:hover { background: rgba(255,255,255,.11); }
+.btn-night:active { transform: scale(.98); }
+.btn-night.primary { background: var(--glow); color: var(--night); border-color: var(--glow); font-weight: 600; }
+.btn-night.primary:hover { background: #7DEEC6; }
+.btn-night svg { width: 16px; height: 16px; }
+
+/* =====================================================================
+   CARDS + WORK AREA
+   ===================================================================== */
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow), var(--hi); }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 22px 24px 0; }
+.card-head h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+.card-head p { margin: 3px 0 0; color: var(--ink-3); font-size: 14px; }
+.card-body { padding: 20px 24px 24px; }
+
+.section-title { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 64px 0 18px; }
+.section-title h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.1; }
+.section-title p { margin: 6px 0 0; color: var(--ink-2); font-size: 15px; max-width: 60ch; }
+
+.work { margin-top: 20px; }
+.chart-card { grid-column: span 8; display: flex; flex-direction: column; }
+.settings { grid-column: span 4; }
+
+.seg { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 3px; background: #EEF1EF; border: 1px solid var(--line); border-radius: 11px; }
+.seg-pill { position: absolute; top: 3px; bottom: 3px; left: 3px; border-radius: 8px; background: var(--surface); box-shadow: 0 1px 2px rgba(11,31,26,.1), 0 0 0 1px rgba(11,31,26,.05); transition: transform .35s var(--ease-out), width .35s var(--ease-out); }
+.seg button { position: relative; z-index: 1; height: 32px; padding: 0 14px; border: none; background: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: color .2s; }
+.seg button[aria-pressed="true"] { color: var(--ink); }
+
+.legend { display: flex; gap: 18px; padding: 14px 24px 0; font-size: 13px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 3px; margin-right: 7px; vertical-align: 0; }
+.chart-wrap { position: relative; flex: 1; min-height: 340px; margin: 4px 12px 0; touch-action: pan-y; }
+#chart { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+#chart text { font-family: var(--font); font-size: 12px; fill: var(--ink-3); }
+.tip {
+  position: absolute; top: 6px; min-width: 200px; padding: 12px 14px;
+  background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-pop);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: 13px; pointer-events: none; opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .2s var(--ease-out), left .12s var(--ease-out);
+}
+.tip.show { opacity: 1; transform: none; }
+.tip b { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.tip div { display: flex; justify-content: space-between; gap: 16px; color: var(--ink-2); line-height: 1.75; }
+.tip div span:last-child { color: var(--ink); font-weight: 600; }
+.chart-foot { padding: 10px 24px 20px; color: var(--ink-3); font-size: 13px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font-weight: 500; font-size: 14px; text-decoration: none; cursor: pointer; box-shadow: var(--shadow-sm); transition: background .15s, transform .15s var(--ease-spring); }
+.btn:hover { background: #F7F9F8; }
+.btn:active { transform: scale(.98); }
+
+/* Settings: inspector-style panel */
+.settings .card-body { padding-top: 10px; }
+.group-label { margin: 10px 0 2px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px; border-top: 1px solid var(--line); }
+.row.first { border-top: none; }
+.row label, .row .lbl { font-size: 14px; color: var(--ink); font-weight: 500; }
+.row small { display: block; color: var(--ink-3); font-size: 12px; font-weight: 400; margin-top: 1px; }
+.row[hidden] { display: none; }
+.num { display: inline-flex; align-items: center; height: 36px; width: 110px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 10px; background: #FBFCFB; transition: border-color .15s, box-shadow .2s, background .15s; }
+.num:hover { border-color: var(--ink-3); }
+.num:focus-within { border-color: var(--green-2); background: #fff; box-shadow: 0 0 0 4px rgba(21,163,116,.14); }
+.num input { flex: 1; min-width: 0; width: 100%; border: none; outline: none; background: none; text-align: right; font-weight: 600; font-size: 14px; }
+.num span { color: var(--ink-3); font-size: 13px; }
+.num span:first-child { margin-right: 2px; }
+.num span:last-child { margin-left: 4px; }
+.num.wide { width: 128px; }
+.num input::-webkit-outer-spin-button, .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num input[type=number] { -moz-appearance: textfield; }
+.stepper { display: inline-flex; align-items: center; gap: 6px; }
+.stepper button { width: 30px; height: 36px; border-radius: 9px; border: 1px solid var(--line-2); background: #FBFCFB; color: var(--ink-2); font-size: 16px; line-height: 1; cursor: pointer; transition: background .15s, transform .15s var(--ease-spring); }
+.stepper button:hover { background: #F0F3F1; color: var(--ink); }
+.stepper button:active { transform: scale(.94); }
+.stepper .num { width: 84px; }
+
+/* Toggle is a real <button role="switch">: one element, one click handler, no hidden checkbox */
+.switch { position: relative; width: 42px; height: 26px; flex: 0 0 auto; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+.switch::before { content: ''; position: absolute; inset: -12px -8px; }  /* bigger tap target */
+.switch .track { position: absolute; inset: 0; border-radius: 999px; background: var(--line-2); transition: background .25s; box-shadow: inset 0 1px 2px rgba(11,31,26,.12); pointer-events: none; }
+.switch .track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .35s var(--ease-spring); }
+.switch[aria-checked="true"] .track { background: var(--green-2); }
+.switch[aria-checked="true"] .track::after { transform: translateX(16px); }
+.switch:focus-visible { outline: none; }
+.switch:focus-visible .track { outline: 2px solid var(--green-2); outline-offset: 2px; }
+.row.toggle-row { cursor: pointer; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+/* Stop mobile browsers from treating quick repeat taps as double-tap zoom */
+button, a, input, label, .seg, .stepper { touch-action: manipulation; }
+.settings .seg { width: 100%; margin: 6px 0 14px; }
+.settings .seg button { padding: 0 6px; font-size: 13px; }
+.textlink { background: none; border: none; padding: 0; color: var(--green); font-weight: 500; font-size: 12px; cursor: pointer; }
+.textlink:hover { text-decoration: underline; }
+.note { display: flex; gap: 10px; margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; background: #F5F7F6; border: 1px solid var(--line); color: var(--ink-2); font-size: 13px; line-height: 1.5; }
+.note svg { flex: 0 0 auto; margin-top: 2px; }
+
+/* Bento stats */
+.bento { grid-column: span 12; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; }
+.stat { padding: 20px 22px 18px; display: flex; flex-direction: column; min-height: 176px; }
+.stat span.k { color: var(--ink-2); font-size: 14px; }
+.stat strong { display: block; margin-top: 6px; font-size: 30px; font-weight: 600; letter-spacing: -0.045em; line-height: 1.1; }
+.stat .viz { margin-top: auto; padding-top: 16px; height: 58px; }
+.stat .viz svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.stat .cap { margin-top: 8px; font-size: 12px; color: var(--ink-3); }
+.split { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: #EEF1EF; margin-top: 30px; }
+.split i { display: block; height: 100%; transition: width .8s var(--ease-out); }
+.split-legend { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.split-legend b { color: var(--ink); font-weight: 600; }
+
+/* Goal */
+.goal-card { grid-column: span 5; }
+.goal-ring { display: flex; align-items: center; gap: 20px; margin-bottom: 18px; }
+.ring { position: relative; width: 104px; height: 104px; flex: 0 0 auto; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 10; }
+.ring .bg { stroke: #EEF1EF; }
+.ring .fg { stroke: url(#ringGrad); stroke-linecap: round; transition: stroke-dashoffset 1.1s var(--ease-out); }
+.ring-val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 20px; font-weight: 600; letter-spacing: -0.03em; }
+.goal-line { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.goal-line b { color: var(--ink); font-weight: 600; }
+.ladder { list-style: none; margin: 0; padding: 0; }
+.ladder li { display: grid; grid-template-columns: 116px 1fr 70px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.ladder .amt { font-weight: 500; }
+.ladder .bar { height: 6px; border-radius: 3px; background: #EEF1EF; overflow: hidden; }
+.ladder .bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #7ED9B6, var(--green-2)); transition: width .9s var(--ease-out); }
+.ladder .yr { text-align: right; color: var(--ink-3); }
+.ladder .yr.hit { color: var(--ink); font-weight: 600; }
+.ladder li.is-goal .amt { color: var(--green); font-weight: 600; }
+
+/* Fund */
+.fund-card { grid-column: span 7; }
+.fund-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.fund-badge { width: 56px; height: 56px; flex: 0 0 auto; border-radius: 16px; display: grid; place-items: center; background: var(--night); color: var(--glow); font-weight: 600; font-size: 13px; letter-spacing: -0.02em; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 16px -8px rgba(11,31,26,.5); }
+.fund-hero h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.025em; }
+.fund-hero p { margin: 2px 0 0; color: var(--ink-3); font-size: 14px; }
+.fund-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.fund-grid div { padding: 14px 16px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin: -1px 0 0 -1px; }
+.fund-grid dt { color: var(--ink-3); font-size: 13px; }
+.fund-grid dd { margin: 3px 0 0; font-weight: 600; font-size: 15px; }
+.grade { display: inline-block; min-width: 26px; padding: 0 7px; border-radius: 6px; text-align: center; font-weight: 600; }
+.g-a { background: var(--mint); color: var(--green); }
+.g-b { background: #E4EEF8; color: #25598F; }
+.g-c { background: #FBF1DC; color: #8A5A0B; }
+.g-d { background: #FCE9DD; color: #9A4412; }
+.g-f { background: #FBE3E3; color: #A12A2A; }
+.fee { margin: 14px 0 0; color: var(--ink-2); font-size: 14px; }
+.fee b { color: var(--ink); font-weight: 600; }
+
+/* Peers */
+.peers-card { grid-column: span 12; overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: right; font-weight: 500; color: var(--ink-3); font-size: 13px; padding: 0 16px 10px; white-space: nowrap; border-bottom: 1px solid var(--line); }
+td { text-align: right; padding: 0 16px; height: 58px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+tbody tr:last-child td { border-bottom: none; }
+.peers-table tbody tr { cursor: pointer; transition: background .12s; }
+.peers-table tbody tr:hover { background: #F7F9F8; }
+.peers-table tbody tr:hover .go { opacity: 1; transform: none; }
+.peers-table tbody tr.current { background: #F3FAF6; cursor: default; }
+.peers-table a { color: var(--ink); text-decoration: none; font-weight: 600; }
+.peers-table .tick-cell { display: flex; align-items: center; gap: 12px; height: 58px; }
+.mini-badge { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: #EEF1EF; color: var(--ink-2); font-size: 10px; font-weight: 600; letter-spacing: -0.02em; }
+.current .mini-badge { background: var(--night); color: var(--glow); }
+.peers-table .pname { color: var(--ink-2); max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.peers-table .pbar { width: 24%; }
+.peers-table .pbar span { display: block; height: 8px; border-radius: 4px; background: #EEF1EF; overflow: hidden; }
+.peers-table .pbar i { display: block; height: 100%; background: linear-gradient(90deg, #7ED9B6, var(--green-2)); border-radius: 4px; transition: width .9s var(--ease-out); }
+.peers-table .pinc { font-weight: 600; }
+.go { display: inline-block; margin-left: 8px; opacity: 0; transform: translateX(-4px); transition: opacity .15s, transform .2s var(--ease-out); color: var(--green); }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--mint); color: var(--green); font-size: 11px; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 24px 22px; border-top: 1px solid var(--line); background: #FAFBFA; }
+.chips span { color: var(--ink-3); font-size: 13px; margin-right: 4px; align-self: center; }
+.chips a { padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink); background: #fff; text-decoration: none; font-weight: 500; font-size: 13px; transition: border-color .15s, color .15s, transform .15s var(--ease-spring); }
+.chips a:hover { border-color: var(--green-2); color: var(--green); transform: translateY(-1px); }
+
+/* Years */
+.years-card { grid-column: span 12; overflow: hidden; }
+.years-card summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; }
+.years-card summary::-webkit-details-marker { display: none; }
+.years-card summary h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+.years-card summary p { margin: 3px 0 0; color: var(--ink-3); font-size: 14px; }
+.years-card summary .btn { pointer-events: none; }
+.years-card summary .chev { transition: transform .3s var(--ease-out); }
+.years-card details[open] summary .chev { transform: rotate(180deg); }
+.years-card .table-scroll { border-top: 1px solid var(--line); padding: 10px 8px 8px; max-height: 540px; overflow-y: auto; }
+.years-card thead th { position: sticky; top: -10px; background: var(--surface); padding-top: 10px; z-index: 1; }
+.years-card td { height: 44px; }
+tr.goal-row td { background: var(--mint); }
+td.strong { font-weight: 600; }
+
+/* PRO banner */
+.pro { grid-column: span 12; position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 34px 36px; border-radius: 24px; background: var(--night); color: var(--night-text); box-shadow: var(--shadow-stage); }
+.pro::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(60% 120% at 100% 50%, rgba(91,227,180,.18), transparent 60%); }
+.pro-dots { position: absolute; right: 230px; top: 50%; transform: translateY(-50%); z-index: -1; opacity: .5; }
+.pro h2 { margin: 0 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.035em; color: #fff; }
+.pro p { margin: 0; color: var(--night-muted); max-width: 58ch; }
+.pro .btn-night { height: 44px; padding: 0 20px; }
+
+footer { padding: 48px 0 56px; color: var(--ink-3); font-size: 13px; }
+.foot-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+footer nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+footer nav a { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: 14px; }
+footer nav a:hover { color: var(--ink); }
+footer p { max-width: 90ch; margin: 0 0 8px; line-height: 1.6; }
+
+/* =====================================================================
+   FUND PICKER (command palette)
+   ===================================================================== */
+.palette { position: fixed; inset: 0; z-index: 100; }
+.palette[hidden] { display: none; }
+.palette-bg { position: absolute; inset: 0; background: rgba(11,31,26,.38); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fade .2s ease-out; }
+@keyframes fade { from { opacity: 0; } }
+.palette-panel {
+  position: relative; margin: max(10vh, 72px) auto 0; width: min(600px, calc(100vw - 24px));
+  background: rgba(255,255,255,.96); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-pop); overflow: hidden;
+  animation: pop .28s var(--ease-out);
+}
+@keyframes pop { from { opacity: 0; transform: translateY(-10px) scale(.97); } to { opacity: 1; transform: none; } }
+.palette-search { display: flex; align-items: center; gap: 12px; padding: 0 18px; height: 62px; border-bottom: 1px solid var(--line); }
+.palette-search input { flex: 1; min-width: 0; border: none; outline: none; background: none; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+.palette-search input::placeholder { color: var(--ink-3); }
+kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 6px; padding: 0 6px; background: #fff; }
+.palette ul { list-style: none; margin: 0; padding: 6px; max-height: min(430px, 60vh); overflow-y: auto; }
+.palette li { display: grid; grid-template-columns: 38px 64px 1fr auto; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 12px; cursor: pointer; }
+.palette li[aria-selected="true"] { background: #EEF3F0; }
+.palette .s-sym { font-weight: 600; }
+.palette .s-name { color: var(--ink-2); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette .s-yld { font-weight: 600; font-size: 14px; color: var(--green); }
+.palette .s-empty { display: block; color: var(--ink-3); cursor: default; padding: 16px 12px; }
+.palette-foot { display: flex; justify-content: space-between; gap: 12px; margin: 0; padding: 10px 18px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 12px; background: #FAFBFA; }
+.palette-foot span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Toast */
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 120; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 10px 16px; border-radius: 12px; background: var(--night); color: var(--night-text); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-pop); transition: opacity .25s, transform .35s var(--ease-spring); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Loading shimmer */
+.loading .kpis dd, .loading .big { color: transparent !important; -webkit-text-fill-color: transparent; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.14), rgba(255,255,255,.06)); background-size: 200% 100%; border-radius: 12px; animation: shimmer 1.3s infinite linear; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+
+/* =====================================================================
+   WHAT YOUR DIVIDENDS COULD PAY FOR
+   ===================================================================== */
+.cover-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.cover-ctrl { display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
+.play-btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 12px; border-radius: 11px; border: none; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(11,31,26,.25), inset 0 1px 0 rgba(255,255,255,.1); transition: transform .15s var(--ease-spring), background .15s; }
+.play-btn:hover { background: #17352D; }
+.play-btn:active { transform: scale(.97); }
+.play-btn svg { width: 14px; height: 14px; }
+.cover-year { display: flex; align-items: center; gap: 12px; }
+.cover-year label { font-size: 14px; color: var(--ink-2); white-space: nowrap; min-width: 62px; }
+.cover-year label b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cover-year input[type=range] { -webkit-appearance: none; appearance: none; width: 180px; height: 28px; background: none; margin: 0; cursor: pointer; }
+.cover-year input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--green-2) var(--p, 100%), #E3E8E5 var(--p, 100%)); }
+.cover-year input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: #E3E8E5; }
+.cover-year input[type=range]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--green-2); }
+.cover-year input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin-top: -7px; border-radius: 50%; background: #fff; border: 1px solid var(--line-2); box-shadow: 0 1px 3px rgba(11,31,26,.2); transition: transform .15s var(--ease-spring); }
+.cover-year input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 1px solid var(--line-2); box-shadow: 0 1px 3px rgba(11,31,26,.2); }
+.cover-year input[type=range]:active::-webkit-slider-thumb { transform: scale(1.12); }
+
+.cover-summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 22px 26px; margin-bottom: 16px; }
+.cover-summary p { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: -0.025em; line-height: 1.35; color: var(--ink-2); max-width: 46ch; }
+.cover-summary p b { color: var(--ink); font-weight: 600; }
+.cover-summary small { display: block; margin-top: 6px; font-size: 14px; color: var(--ink-3); letter-spacing: 0; }
+.cover-summary small b { color: var(--ink-2); font-weight: 600; }
+.cover-dots { display: flex; gap: 8px; }
+.cover-dot { position: relative; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #EEF1EF; color: var(--ink-3); transition: background .4s, color .4s, transform .4s var(--ease-spring), box-shadow .4s; }
+.cover-dot svg { width: 18px; height: 18px; }
+.cover-dot.on { background: var(--green-2); color: #fff; box-shadow: 0 6px 14px -6px rgba(21,163,116,.7); }
+.cover-dot.pop { animation: dotpop .6s var(--ease-spring); }
+@keyframes dotpop { 0% { transform: scale(.8); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+.cover-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+.cover {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 2px;
+  transition: border-color .4s, background .4s, transform .25s var(--ease-out), box-shadow .25s;
+}
+.cover:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop), var(--hi); }
+.cover::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .5s; background: radial-gradient(120% 80% at 100% 0%, rgba(21,163,116,.14), transparent 60%), linear-gradient(180deg, #F3FBF7, #fff 70%); }
+.cover.covered { border-color: rgba(21,163,116,.35); }
+.cover.covered::before { opacity: 1; }
+.cover-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cover-ic { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 11px; display: grid; place-items: center; background: #EEF1EF; color: var(--ink-2); transition: background .4s, color .4s; }
+.cover-ic svg { width: 19px; height: 19px; }
+.cover.covered .cover-ic { background: var(--green-2); color: #fff; }
+.cover-name { font-size: 14px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
+.cover-check { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--green-2); color: #fff; transform: scale(0); transition: transform .45s var(--ease-spring); box-shadow: 0 4px 10px -4px rgba(21,163,116,.8); }
+.cover-check svg { width: 13px; height: 13px; }
+.cover.covered .cover-check { transform: scale(1); }
+.cover.just .cover-check { animation: ping2 .9s var(--ease-out); }
+@keyframes ping2 { 0% { box-shadow: 0 0 0 0 rgba(21,163,116,.55); } 100% { box-shadow: 0 0 0 14px rgba(21,163,116,0); } }
+.cover-amt { display: flex; align-items: baseline; gap: 1px; font-size: 13px; color: var(--ink-3); }
+.cover-amt label { display: inline-flex; align-items: baseline; padding: 1px 3px 1px 6px; margin-left: -6px; border-radius: 7px; color: var(--ink); font-weight: 600; font-size: 14px; cursor: text; transition: background .15s, box-shadow .15s; }
+.cover-amt label:hover { background: #F0F3F1; }
+.cover-amt label:focus-within { background: #fff; box-shadow: 0 0 0 1px var(--green-2), 0 0 0 4px rgba(21,163,116,.14); }
+.cover-amt input { width: 5ch; border: none; outline: none; background: none; padding: 0; font-weight: 600; font-size: 14px; color: var(--ink); }
+.cover-tag { margin-left: auto; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: #EEF1EF; color: var(--ink-3); white-space: nowrap; }
+.cover-tag.mine { background: #FFF3E3; color: #9A5B12; cursor: pointer; }
+.cover-pct { margin-top: 14px; display: flex; align-items: baseline; gap: 8px; font-size: 32px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; }
+.cover-pct small { font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--ink-3); }
+.cover-bar { position: relative; height: 8px; margin: 12px 0 10px; border-radius: 4px; background: #EEF1EF; overflow: hidden; }
+.cover-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 4px; background: linear-gradient(90deg, #7ED9B6, var(--green-2)); transition: width .8s var(--ease-out); }
+.cover.covered .cover-bar i { background: linear-gradient(90deg, var(--green-2), var(--green)); }
+.cover-bar i::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); transform: translateX(-100%); animation: sheen 2.8s ease-in-out infinite; }
+@keyframes sheen { 60%, 100% { transform: translateX(100%); } }
+.cover-status { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; min-height: 2.8em; }
+.cover-status b { color: var(--ink); font-weight: 600; }
+.cover.covered .cover-status b { color: var(--green); }
+.cover-sources { margin: 14px 2px 0; font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+.cover-sources a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+.cover-sources a:hover { color: var(--green); border-color: var(--green-2); }
+
+@media (max-width: 1040px) { .cover-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 640px) {
+  .cover-ctrl { width: 100%; }
+  .cover-year { flex: 1; }
+  .cover-year input[type=range] { width: 100%; flex: 1; }
+  .cover-summary { padding: 18px; }
+  .cover-summary p { font-size: 17px; }
+  .cover-dots { flex-wrap: wrap; gap: 6px; }
+  .cover-dot { width: 32px; height: 32px; border-radius: 10px; }
+  .cover-grid { gap: 10px; }
+  .cover { padding: 14px 14px 12px; }
+  .cover-check { top: 12px; right: 12px; width: 20px; height: 20px; }
+  .cover-top { padding-right: 22px; }
+  .cover-name { font-size: 13px; }
+  .cover-pct { font-size: 26px; }
+  .cover-tag { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .cover-bar i::after { display: none; } }
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+@media (max-width: 1040px) {
+  .stage-top { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .kpis { align-self: stretch; }
+  .chart-card, .settings, .goal-card, .fund-card { grid-column: span 12; }
+  .bento { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px) {
+  .wrap { padding-left: 16px; padding-right: 16px; }
+  .nav .nav-hide { display: none; }
+  .hero { padding-top: 26px; padding-bottom: 16px; }
+  .eyebrow-live { margin-bottom: 16px; }
+  .sentence { font-size: 29px; line-height: 1.34; }
+  .stage { border-radius: 24px; margin-top: 26px; }
+  .stage-top { padding: 24px 20px 18px; }
+  .per { font-size: 17px; }
+  .answer-sub { font-size: 15px; }
+  .meter { font-size: 13px; }
+  .stage-grid { padding: 18px 20px 20px; }
+  .dots-wrap { height: 180px; }
+  .stage-actions { padding: 0 20px 22px; }
+  .stage-actions .btn-night { flex: 1 1 auto; justify-content: center; }
+  .stage-actions kbd { display: none; }
+  .section-title { margin-top: 44px; }
+  .card-head { padding: 18px 18px 0; }
+  .card-body { padding: 16px 18px 20px; }
+  .legend { padding: 12px 18px 0; }
+  .chart-wrap { min-height: 260px; margin: 4px 4px 0; }
+  .chart-foot { padding: 8px 18px 18px; }
+  .bento { grid-template-columns: minmax(0,1fr); gap: 14px; }
+  .stat { min-height: 0; }
+  .fund-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .ladder li { grid-template-columns: 104px 1fr 62px; font-size: 13px; }
+  .peers-table .pname, .peers-table .pbar, .peers-table th.hide-sm { display: none; }
+  .mini-badge { display: none; }
+  th, td { padding-left: 12px; padding-right: 12px; }
+  .chips { padding: 16px 18px 20px; }
+  .pro { padding: 26px 22px; }
+  .pro-dots { display: none; }
+  .years-card summary { padding: 18px; }
+  .palette li { grid-template-columns: 58px 1fr auto; }
+  .palette li .mini-badge { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .intro .sentence .w { opacity: 1; transform: none; filter: none; }
+}
+</style>
+</head>
+<body class="intro">
+
+<header class="site-header" id="siteHeader">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="DividendProjection home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="3.5" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="9" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="9" cy="8.8" r="1.9" fill="#4FD1A5"/><circle cx="14.5" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="14.5" cy="8.8" r="1.9" fill="#4FD1A5"/><circle cx="14.5" cy="3.2" r="2.2" fill="#96F2CF"/></svg>
+      </span>
+      DividendProjection
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a class="nav-hide" href="#covers">What it covers</a>
+      <a class="nav-hide" href="#plan">Your plan</a>
+      <a class="nav-hide" href="#compare">Compare funds</a>
+      <a class="nav-hide" href="#years">Year by year</a>
+      <a class="nav-pro" href="https://topdividendetfspro.com/" target="_blank" rel="noopener">PRO terminal</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap loading" id="hero">
+    <p class="notice" id="notice" hidden></p>
+    <a class="eyebrow-live" href="https://topdividendetfspro.com/" target="_blank" rel="noopener"><i class="dot-live" aria-hidden="true"></i><span>Data sourced from <b>TopDividendETFsPRO.com</b></span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5h5.5V8M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <h1 class="sentence">
+      <span class="w" style="--i:0">If</span> <span class="w" style="--i:1">I</span> <span class="w" style="--i:2">invest</span>
+      <span class="w" style="--i:3"><label class="token"><span>$</span><input id="start" type="text" inputmode="numeric" value="10,000" aria-label="Starting amount in dollars"></label></span>
+      <span class="w" style="--i:4">today</span> <span class="w" style="--i:5">and</span> <span class="w" style="--i:6">add</span>
+      <span class="w" style="--i:7"><label class="token"><span>$</span><input id="monthly" type="text" inputmode="numeric" value="500" aria-label="Monthly deposit in dollars"></label></span>
+      <span class="w" style="--i:8">a</span> <span class="w" style="--i:9">month</span> <span class="w" style="--i:10">into</span>
+      <span class="w" style="--i:11"><button type="button" class="fund-token" id="fundBtn" aria-haspopup="dialog" aria-label="Change fund"><span id="fundSym">SCHD</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
+      <span class="w" style="--i:12">for</span>
+      <span class="w" style="--i:13"><label class="token"><input id="years" type="text" inputmode="numeric" value="20" aria-label="Number of years"></label></span>
+      <span class="w" style="--i:14" id="yrsWord">years.</span>
+      <span id="mirror" aria-hidden="true"></span>
+    </h1>
+
+    <!-- ============ RESULT STAGE ============ -->
+    <section class="stage" aria-live="polite" aria-label="Your projected income">
+      <div class="stage-top">
+        <div class="answer" id="answer">
+          <p class="answer-label" id="answerLabel">It could pay you</p>
+          <div class="big-row" id="bigRow">
+            <p class="big" id="big"><span class="od" id="od">$0</span></p>
+            <span class="per">/month</span>
+          </div>
+          <p class="answer-sub" id="answerSub">&nbsp;</p>
+          <div class="meter" id="meter">
+            <i class="dot-live" aria-hidden="true"></i>
+            <span>That's <b id="perDay">$0</b> a day. Since you opened this page: <span class="tick" id="tick">$0.0000</span></span>
+          </div>
+        </div>
+        <dl class="kpis">
+          <div><dt>Yearly income</dt><dd id="fAnnual">$0</dd></div>
+          <div><dt>Account balance</dt><dd id="fValue">$0</dd></div>
+          <div><dt>Dividends collected</dt><dd id="fDivs" class="glow">$0</dd></div>
+          <div><dt>Money you put in</dt><dd id="fIn">$0</dd></div>
+        </dl>
+      </div>
+
+      <div class="stage-grid">
+        <div class="sg-head">
+          <h2 id="dotsTitle">Every payout you'd receive</h2>
+          <p><span id="dotsLegend">Each dot is one payout</span><span class="sg-scale" aria-hidden="true"><i style="width:4px;height:4px"></i><i style="width:7px;height:7px"></i><i style="width:10px;height:10px"></i></span><span>bigger pays more</span></p>
+        </div>
+        <div class="dots-wrap" id="dotsWrap" tabindex="0" aria-label="Every payout by year. Use the arrow keys to move between years.">
+          <canvas id="dots"></canvas>
+          <div class="dtip" id="dtip"></div>
+        </div>
+      </div>
+
+      <div class="stage-actions">
+        <button type="button" class="btn-night primary" id="shareImg">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1"/></svg>
+          Download share image
+        </button>
+        <button type="button" class="btn-night" id="shareBtn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5a3 3 0 0 0 4.2 0l2.3-2.3a3 3 0 0 0-4.2-4.2l-.8.8M9.5 6.5a3 3 0 0 0-4.2 0L3 8.8a3 3 0 0 0 4.2 4.2l.8-.8"/></svg>
+          Copy link
+        </button>
+        <button type="button" class="btn-night" id="changeFund">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m13.5 13.5-3-3"/></svg>
+          Try another fund <kbd style="background:transparent;color:inherit;border-color:rgba(208,240,226,.25)">/</kbd>
+        </button>
+      </div>
+    </section>
+  </section>
+
+  <div class="wrap">
+    <div class="section-title cover-head" id="covers">
+      <div><h2>What your dividends could pay for</h2><p id="coverSub">Your projected dividend income next to what Americans typically pay each month. Drag the slider to see any year, or tap an amount to use your own.</p></div>
+      <div class="cover-ctrl">
+        <div class="cover-year"><label for="coverYear">Year <b id="coverYearVal">20</b></label><input type="range" id="coverYear" min="1" max="20" step="1" value="20" aria-label="Year to show"></div>
+      </div>
+    </div>
+
+    <div class="card cover-summary">
+      <p id="coverLine">&nbsp;</p>
+      <div class="cover-dots" id="coverDots" aria-hidden="true"></div>
+    </div>
+    <div class="cover-grid" id="coverGrid"></div>
+    <p class="cover-sources" id="coverSources"></p>
+
+    <div class="section-title" id="plan">
+      <div><h2>Tune your plan</h2><p>Change anything here and every number on the page updates instantly.</p></div>
+    </div>
+
+    <div class="grid work">
+      <!-- Chart -->
+      <section class="card chart-card" aria-labelledby="chartTitleH">
+        <div class="card-head">
+          <div><h2 id="chartTitleH">Your income, year by year</h2><p id="chartSubtitle">Monthly dividend income at the end of each year</p></div>
+          <div class="seg" id="mode" role="group" aria-label="Chart view">
+            <span class="seg-pill" aria-hidden="true"></span>
+            <button type="button" data-v="income" aria-pressed="true">Monthly income</button>
+            <button type="button" data-v="balance" aria-pressed="false">Balance</button>
+          </div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="chart-wrap" id="chartWrap" tabindex="0" aria-label="Projection chart. Use the left and right arrow keys to move between years.">
+          <svg id="chart" role="img"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+        <div class="chart-foot">Hover or drag across the chart to read any year.</div>
+      </section>
+
+      <!-- Settings -->
+      <aside class="card settings" aria-labelledby="setTitle">
+        <div class="card-head"><div><h2 id="setTitle">Plan settings</h2><p>Defaults reset every time you pick a fund</p></div></div>
+        <div class="card-body">
+          <div class="row first toggle-row" id="dripRow">
+            <span class="lbl" id="dripLbl">Reinvest dividends<small>Buy more shares with each payout</small></span>
+            <button type="button" class="switch" id="drip" role="switch" aria-checked="true" aria-labelledby="dripLbl"><span class="track"></span></button>
+          </div>
+          <div class="row" style="display:block; padding-top:14px;">
+            <span class="lbl" id="acctLbl">Account type</span>
+            <div class="seg" id="acct" role="group" aria-labelledby="acctLbl">
+              <span class="seg-pill" aria-hidden="true"></span>
+              <button type="button" data-v="taxable" aria-pressed="true">Taxable</button>
+              <button type="button" data-v="roth" aria-pressed="false">Roth IRA</button>
+              <button type="button" data-v="ira" aria-pressed="false">IRA / 401k</button>
+            </div>
+          </div>
+          <div class="row" id="taxRow">
+            <label for="tax">Tax on dividends<small>Add your rate if you pay any</small></label>
+            <span class="num"><input id="tax" type="number" inputmode="decimal" min="0" max="60" step="1" value="0"><span>%</span></span>
+          </div>
+          <div class="row">
+            <label for="yield">Dividend yield<small id="yieldNote">Live yield</small></label>
+            <span class="num"><input id="yield" type="number" inputmode="decimal" min="0" step="0.01" value="0"><span>%</span></span>
+          </div>
+          <div class="row">
+            <label for="divg">Dividend growth<small>Per year, starts at 0%</small></label>
+            <span class="stepper">
+              <button type="button" data-step="divg" data-d="-1" aria-label="Lower dividend growth by 1%">&minus;</button>
+              <span class="num"><input id="divg" type="number" inputmode="decimal" step="1" value="0"><span>%</span></span>
+              <button type="button" data-step="divg" data-d="1" aria-label="Raise dividend growth by 1%">+</button>
+            </span>
+          </div>
+          <div class="row">
+            <label for="cinc">Raise my deposits<small>Per year</small></label>
+            <span class="num"><input id="cinc" type="number" inputmode="decimal" min="0" step="0.5" value="0"><span>%</span></span>
+          </div>
+          <div class="row">
+            <label for="goal">Monthly income goal</label>
+            <span class="num wide"><span>$</span><input id="goal" type="number" inputmode="decimal" min="0" step="100" value="2000"></span>
+          </div>
+          <p class="note">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#85948E" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg>
+            <span>Assumes the share price never changes and dividends stay flat unless you add growth.</span>
+          </p>
+        </div>
+      </aside>
+
+      <!-- Bento -->
+      <div class="bento">
+        <div class="card stat">
+          <span class="k">Where your balance comes from</span>
+          <strong id="bBal">$0</strong>
+          <div class="split" aria-hidden="true"><i id="splitIn" style="background:#CBD3CF;width:50%"></i><i id="splitDiv" style="background:var(--green-2);width:50%"></i></div>
+          <div class="split-legend"><span>You put in <b id="splitInP">50%</b></span><span>Dividends <b id="splitDivP">50%</b></span></div>
+        </div>
+        <div class="card stat">
+          <span class="k">Yield on what you put in</span>
+          <strong id="sYoc">0%</strong>
+          <div class="viz" id="vYoc"></div>
+          <div class="cap" id="capYoc">&nbsp;</div>
+        </div>
+        <div class="card stat">
+          <span class="k" id="sPayLbl">Each payout</span>
+          <strong id="sPay">$0</strong>
+          <div class="viz" id="vPay"></div>
+          <div class="cap" id="capPay">&nbsp;</div>
+        </div>
+        <div class="card stat">
+          <span class="k">Taxes on dividends</span>
+          <strong id="sTax">$0</strong>
+          <div class="viz" id="vTax"></div>
+          <div class="cap" id="capTax">&nbsp;</div>
+        </div>
+      </div>
+
+      <!-- Goal -->
+      <section class="card goal-card" aria-labelledby="goalTitle">
+        <div class="card-head"><div><h2 id="goalTitle">Your income goal</h2><p>When each monthly income level is reached</p></div></div>
+        <div class="card-body">
+          <div class="goal-ring">
+            <div class="ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ED9B6"/><stop offset="1" stop-color="#0B7A55"/></linearGradient></defs>
+                <circle class="bg" cx="60" cy="60" r="50"/>
+                <circle class="fg" id="ringFg" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+              </svg>
+              <div class="ring-val" id="ringVal">0%</div>
+            </div>
+            <p class="goal-line" id="goalLine">&nbsp;</p>
+          </div>
+          <ul class="ladder" id="ladder"></ul>
+        </div>
+      </section>
+
+      <!-- Fund -->
+      <section class="card fund-card" aria-labelledby="fundTitle">
+        <div class="card-head"><div><h2 id="fundTitle">About this fund</h2><p>Live data from the TopDividendETFs PRO database</p></div></div>
+        <div class="card-body">
+          <div class="fund-hero"><div class="fund-badge" id="fundBadge">—</div><div><h3 id="fundName">Loading…</h3><p id="fundProv">&nbsp;</p></div></div>
+          <dl class="fund-grid" id="fundGrid"></dl>
+          <p class="fee" id="fee"></p>
+        </div>
+      </section>
+    </div>
+
+    <div class="section-title" id="compare">
+      <div><h2>Same plan, other funds</h2><p id="peersSub">Your exact plan with the funds closest in yield. Select any fund to switch.</p></div>
+    </div>
+
+    <div class="grid">
+      <section class="card peers-card" aria-label="Similar funds">
+        <div class="card-body" style="padding:14px 8px 4px;">
+          <div class="table-scroll">
+            <table class="peers-table">
+              <thead><tr><th class="l">Fund</th><th class="l hide-sm">Name</th><th>Yield</th><th class="hide-sm"></th><th>Monthly income</th></tr></thead>
+              <tbody id="peersBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="chips" id="popular"></div>
+      </section>
+
+      <section class="card years-card" id="years">
+        <details>
+          <summary>
+            <div><h2>Year-by-year breakdown</h2><p>Every year of the plan, with your goal year highlighted</p></div>
+            <span class="btn">Table <svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </summary>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Year</th><th>Money put in</th><th>Dividends that year</th><th>Monthly income</th><th>Balance</th></tr></thead>
+              <tbody id="yearsBody"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+
+      <section class="pro">
+        <svg class="pro-dots" width="220" height="120" viewBox="0 0 220 120" aria-hidden="true" id="proDots"></svg>
+        <div>
+          <h2>Choosing your next dividend ETF?</h2>
+          <p>TopDividendETFs PRO ranks every fund in this calculator by yield, tax grade, total return and rating, updated daily.</p>
+        </div>
+        <a class="btn-night primary" href="https://topdividendetfspro.com/" target="_blank" rel="noopener" style="text-decoration:none">Open PRO terminal</a>
+      </section>
+    </div>
+
+    <footer>
+      <div class="foot-top">
+        <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18"><circle cx="3.5" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="9" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="9" cy="8.8" r="1.9" fill="#4FD1A5"/><circle cx="14.5" cy="14" r="1.6" fill="#4FD1A5"/><circle cx="14.5" cy="8.8" r="1.9" fill="#4FD1A5"/><circle cx="14.5" cy="3.2" r="2.2" fill="#96F2CF"/></svg></span>DividendProjection</a>
+        <nav aria-label="Network">
+          <a href="https://topdividendetfs.com/" target="_blank" rel="noopener">TopDividendETFs</a>
+          <a href="https://topdividendetfspro.com/" target="_blank" rel="noopener">PRO Terminal</a>
+          <a href="https://weeklyetfs.com/" target="_blank" rel="noopener">WeeklyETFs</a>
+          <a href="https://monthlyetfs.com/" target="_blank" rel="noopener">MonthlyETFs</a>
+          <a href="https://etftotalreturns.com/" target="_blank" rel="noopener">ETFTotalReturns</a>
+          <a href="mailto:Business@TopDividendETFs.com">Contact</a>
+        </nav>
+      </div>
+      <p>Projections are hypothetical and for educational purposes only. They are not financial, investment or tax advice. They assume today's yield and share price stay the same, which will not happen in real markets. Distributions can be cut and share prices can fall. Past performance does not predict future results. Speak with a qualified advisor before investing.</p>
+      <p>&copy; 2026 DividendProjection</p>
+    </footer>
+  </div>
+</main>
+
+<!-- Fund picker -->
+<div class="palette" id="palette" hidden>
+  <div class="palette-bg" id="paletteBg"></div>
+  <div class="palette-panel" role="dialog" aria-modal="true" aria-label="Choose a fund">
+    <div class="palette-search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#85948E" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Search a ticker, fund name or provider" role="combobox" aria-expanded="true" aria-controls="sugg" aria-autocomplete="list">
+      <kbd>esc</kbd>
+    </div>
+    <ul id="sugg" role="listbox"></ul>
+    <div class="palette-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move, <kbd>enter</kbd> to open</span><span>Yields refresh daily</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script>
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTxCiod-Cwry7E6k9Un9dgrM_ANymC36_IO_wLyNj-YDo2KI7mp_1ZzyNBnBGZOxT48QPM8TCwtsmA4/pub?gid=0&single=true&output=csv";
+const SITE = "https://dividendprojection.com/";
+const DEFAULT_TICKER = "SCHD";
+// Money settings carry over when you switch funds. Dividend growth and yield do not.
+const DEFAULTS = { a: 10000, m: 500, y: 20, d: 1, acct: 'taxable', t: 0, ci: 0, goal: 2000, g: 0 };
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const state = { funds: [], fund: null, rows: [], totalDiv: 0, totalTax: 0, mode: 'income', hoverYear: null, dotHover: null };
+
+/* =====================================================================
+   PARSING
+   ===================================================================== */
+function parseCSV(text) {
+  const out = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell.trim()); cell = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell.trim()); out.push(row); row = []; cell = ''; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell.trim()); out.push(row); }
+  return out;
+}
+const num = s => { const v = parseFloat(String(s ?? '').replace(/[$,%\s]/g, '')); return isNaN(v) ? null : v; };
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - t, 4);
+function parseAUM(s) {
+  const m = String(s || '').replace(/[$,\s]/g, '').match(/^(-?[\d.]+)([KMBT])?/i);
+  return m ? parseFloat(m[1]) * ({ K: 1e3, M: 1e6, B: 1e9, T: 1e12 }[(m[2] || '').toUpperCase()] || 1) : 0;
+}
+function normalizeDate(str) {
+  const m = String(str || '').match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+  if (m) { let [, mo, d, y] = m; if (y.length === 2) y = '20' + y; return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`; }
+  return str;
+}
+function periodsFor(freq) {
+  const f = (freq || '').toLowerCase();
+  if (f.includes('week')) return 52;
+  if (f.includes('quarter')) return 4;
+  if (f.includes('semi')) return 2;
+  if (f.includes('annual') || f.includes('year')) return 1;
+  return 12;
+}
+function buildFund(c) {
+  const f = {
+    sym: (c[0] || '').toUpperCase(), name: c[1] || '', provider: c[2] || '', yield: num(c[3]),
+    taxGrade: (c[4] || '').toUpperCase(), er: num(c[5]), aumText: c[6] || '', aum: parseAUM(c[6]),
+    tr: num(c[7]), decay: (c[8] || '').toUpperCase(), inception: c[9] || '', freq: c[10] || '', rating: (c[11] || '').toUpperCase()
+  };
+  f.periods = periodsFor(f.freq);
+  f.ann = null;
+  const inc = new Date(normalizeDate(f.inception));
+  if (!isNaN(inc.getTime()) && f.tr !== null) {
+    const yrs = (Date.now() - inc.getTime()) / (365.25 * 864e5);
+    if (yrs >= 1 && 1 + f.tr / 100 > 0) f.ann = (Math.pow(1 + f.tr / 100, 1 / yrs) - 1) * 100;
+  }
+  return f;
+}
+
+/* =====================================================================
+   FORMATTING
+   ===================================================================== */
+const usd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const usd2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = v => (Math.abs(v) < 100 ? usd2 : usd0).format(v || 0);
+const commas = v => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(v || 0);
+function compact(v) {
+  const a = Math.abs(v), f = (n, d) => (v / n).toFixed(d).replace(/\.0$/, '');
+  if (a >= 1e9) return '$' + f(1e9, a >= 1e10 ? 0 : 1) + 'B';
+  if (a >= 1e6) return '$' + f(1e6, a >= 1e7 ? 0 : 1) + 'M';
+  if (a >= 1e3) return '$' + f(1e3, a >= 1e4 ? 0 : 1) + 'K';
+  return '$' + Math.round(v);
+}
+const pct = (v, d = 2) => (v === null || v === undefined || isNaN(v)) ? '—' : (+v).toFixed(d).replace(/\.?0+$/, '') + '%';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const payWord = p => ({ 52: 'weekly', 12: 'monthly', 4: 'quarterly', 2: 'semi-annual', 1: 'annual' }[p] || 'monthly');
+const payNoun = p => ({ 52: 'week', 12: 'month', 4: 'quarter', 2: 'half-year', 1: 'year' }[p] || 'month');
+
+/* =====================================================================
+   PROJECTION ENGINE
+   Share price is flat forever. Each payout period: deposits go in, the fund
+   pays balance x yield / payouts-per-year, tax comes out, and the rest is
+   reinvested or kept as cash. Dividends grow only by the rate the reader sets.
+   ===================================================================== */
+function project(o) {
+  const P = o.periods, taxRate = o.tax / 100;
+  const g = Math.pow(1 + o.divGrowth / 100, 1 / P) - 1;
+  let yld = o.yield / 100, invested = o.start, cash = 0, putIn = o.start, totalDiv = 0, totalTax = 0, monthly = o.monthly;
+  const rows = [{ year: 0, putIn, divYear: 0, taxYear: 0, value: invested, annual: invested * yld * (1 - taxRate), payouts: [], cumTax: 0 }];
+  for (let y = 1; y <= o.years; y++) {
+    let divYear = 0, taxYear = 0;
+    const deposit = monthly * 12 / P, payouts = new Array(P);
+    for (let k = 0; k < P; k++) {
+      yld *= 1 + g;
+      invested += deposit; putIn += deposit;
+      const gross = invested * yld / P, tax = gross * taxRate, net = gross - tax;
+      payouts[k] = net;
+      divYear += net; taxYear += tax; totalDiv += net; totalTax += tax;
+      if (o.drip) invested += net; else cash += net;
+    }
+    rows.push({ year: y, putIn, divYear, taxYear, cumTax: totalTax, value: invested + cash, annual: invested * yld * (1 - taxRate), payouts });
+    monthly *= 1 + o.contribInc / 100;
+  }
+  rows.forEach(r => { r.monthlyInc = r.annual / 12; r.earned = Math.max(0, r.value - r.putIn); });
+  return { rows, totalDiv, totalTax };
+}
+
+/* =====================================================================
+   INPUT STATE + URL
+   ===================================================================== */
+const moneyVal = id => Math.max(0, num($(id).value) || 0);
+function readInputs() {
+  const acct = document.querySelector('#acct [aria-pressed="true"]').dataset.v;
+  return {
+    start: moneyVal('start'), monthly: moneyVal('monthly'),
+    years: clamp(parseInt($('years').value, 10) || 1, 1, 50),
+    drip: $('drip').getAttribute('aria-checked') === 'true', acct,
+    tax: acct === 'taxable' ? clamp(num($('tax').value) || 0, 0, 60) : 0,
+    taxInput: num($('tax').value) || 0,
+    yield: Math.max(0, num($('yield').value) || 0),
+    divGrowth: clamp(num($('divg').value) || 0, -50, 50),
+    contribInc: clamp(num($('cinc').value) || 0, 0, 50),
+    goal: Math.max(0, num($('goal').value) || 0),
+    periods: state.fund ? state.fund.periods : 12
+  };
+}
+function setSeg(groupId, v) {
+  const g = $(groupId);
+  g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  placePill(g);
+}
+function placePill(g) {
+  const pill = g.querySelector('.seg-pill'), on = g.querySelector('[aria-pressed="true"]');
+  if (!pill || !on) return;
+  pill.style.width = on.offsetWidth + 'px';
+  pill.style.transform = `translateX(${on.offsetLeft - 3}px)`;
+}
+function setAcct(v) { setSeg('acct', v); $('taxRow').hidden = v !== 'taxable'; }
+
+function applyParams() {
+  const g = k => params.has(k) ? params.get(k) : DEFAULTS[k];
+  $('start').value = commas(num(g('a')) || 0);
+  $('monthly').value = commas(num(g('m')) || 0);
+  $('years').value = clamp(parseInt(g('y'), 10) || 20, 1, 50);
+  $('drip').setAttribute('aria-checked', String(String(g('d')) !== '0'));
+  $('tax').value = g('t'); $('cinc').value = g('ci'); $('goal').value = g('goal');
+  $('divg').value = g('g');
+  setAcct(['taxable', 'roth', 'ira'].includes(g('acct')) ? g('acct') : 'taxable');
+}
+/* forShare = true keeps this fund's own tweaks (growth, edited yield) for the share link.
+   forShare = false is used for switching funds, so growth and yield reset to defaults. */
+function stateParams(sym, forShare) {
+  const o = readInputs(), p = new URLSearchParams();
+  p.set('etf', sym);
+  if (o.start !== DEFAULTS.a) p.set('a', o.start);
+  if (o.monthly !== DEFAULTS.m) p.set('m', o.monthly);
+  if (o.years !== DEFAULTS.y) p.set('y', o.years);
+  if (!o.drip) p.set('d', 0);
+  if (o.acct !== DEFAULTS.acct) p.set('acct', o.acct);
+  if (o.taxInput !== DEFAULTS.t) p.set('t', o.taxInput);
+  if (o.contribInc !== DEFAULTS.ci) p.set('ci', o.contribInc);
+  if (o.goal !== DEFAULTS.goal) p.set('goal', o.goal);
+  if (forShare && state.fund) {
+    if (o.divGrowth !== DEFAULTS.g) p.set('g', o.divGrowth);
+    if (Math.abs(o.yield - state.fund.yield) > 0.004) p.set('yo', o.yield);
+  }
+  return p;
+}
+const fundHref = sym => '/?' + stateParams(sym, false).toString();
+const goTo = sym => { track('fund_switched', { to_etf: sym, source: 'search' }); location.href = fundHref(sym); };
+
+/* Inline sentence inputs size themselves to their content */
+function autosize(inp) {
+  const m = $('mirror');
+  m.style.fontSize = getComputedStyle(inp).fontSize;
+  m.textContent = inp.value || '0';
+  inp.style.width = (m.offsetWidth + 3) + 'px';
+}
+const sizeAll = () => ['start', 'monthly', 'years'].forEach(id => autosize($(id)));
+
+/* =====================================================================
+   ODOMETER + FIT-TO-WIDTH HEADLINE NUMBER
+   ===================================================================== */
+const od = { text: '' };
+function setOdometer(text, instant) {
+  const el = $('od');
+  if (text.length !== od.text.length || !el.querySelector('.od-ch')) {
+    el.innerHTML = [...text].map((ch, i) => /\d/.test(ch)
+      ? `<span class="od-ch od-dg"><span class="od-st" style="transition-delay:${(text.length - i) * 35}ms">${[0,1,2,3,4,5,6,7,8,9].map(n => `<span>${n}</span>`).join('')}</span></span>`
+      : `<span class="od-ch">${ch}</span>`).join('');
+    if (!instant) el.offsetHeight; // commit the 0 position so the roll animates
+  }
+  const chars = el.querySelectorAll('.od-ch');
+  [...text].forEach((ch, i) => {
+    const node = chars[i];
+    if (!node) return;
+    if (/\d/.test(ch)) {
+      const st = node.querySelector('.od-st');
+      if (!st) { node.textContent = ch; return; }
+      if (instant) st.style.transition = 'none';
+      st.style.transform = `translateY(${-parseInt(ch, 10)}em)`;
+      if (instant) { st.offsetHeight; st.style.transition = ''; }
+    } else node.textContent = ch;
+  });
+  el.setAttribute('aria-label', text);
+  od.text = text;
+  fitBig();
+}
+// Shrinks the headline number so it can never spill into the next column
+function fitBig() {
+  const big = $('big'), row = $('bigRow'), answer = $('answer');
+  const avail = answer.clientWidth;
+  const per = row.querySelector('.per');
+  const maxPx = innerWidth <= 640 ? 84 : innerWidth <= 1040 ? 124 : 140;
+  big.style.fontSize = '100px';
+  const w100 = big.scrollWidth;
+  const perW = per.offsetWidth + 12;
+  const size = clamp(Math.floor(((avail - perW) / w100) * 100), 34, maxPx);
+  big.style.fontSize = size + 'px';
+}
+
+/* Live "since you opened this page" meter */
+const meter = { perSec: 0, t0: performance.now() };
+function tickMeter() {
+  const earned = meter.perSec * (performance.now() - meter.t0) / 1000;
+  $('tick').textContent = earned < 1 ? '$' + earned.toFixed(4) : earned < 100 ? '$' + earned.toFixed(2) : usd0.format(earned);
+  setTimeout(() => requestAnimationFrame(tickMeter), reduceMotion ? 1000 : 90);
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+let firstRender = true;
+function render() {
+  const fund = state.fund;
+  if (!fund) return;
+  const o = readInputs();
+  const res = project(o);
+  state.rows = res.rows; state.totalDiv = res.totalDiv; state.totalTax = res.totalTax;
+  const rows = res.rows, end = rows[rows.length - 1];
+  const goalRow = o.goal > 0 ? rows.find(r => r.year > 0 && r.monthlyInc >= o.goal) : null;
+
+  $('yrsWord').textContent = (o.years === 1 ? 'year' : 'years') + '.';
+  $('answerLabel').textContent = `In year ${o.years}, ${fund.sym} could pay you`;
+  setOdometer(money(end.monthlyInc), reduceMotion);
+  const bits = [];
+  if (o.tax > 0) bits.push('after tax');
+  bits.push(`paid <b>${payWord(o.periods)}</b>`);
+  $('answerSub').innerHTML = `${bits.join(', ')}, from a <b>${pct(o.yield)}</b> yield${o.drip ? ' with every dividend reinvested' : ''}.`;
+  $('answerSub').innerHTML = $('answerSub').innerHTML.charAt(0).toUpperCase() + $('answerSub').innerHTML.slice(1);
+  $('perDay').textContent = money(end.annual / 365.25);
+  meter.perSec = end.annual / (365.25 * 86400);
+
+  $('fAnnual').textContent = usd0.format(end.annual);
+  $('fValue').textContent = usd0.format(end.value);
+  $('fDivs').textContent = usd0.format(res.totalDiv);
+  $('fIn').textContent = usd0.format(end.putIn);
+
+  // Bento
+  const inShare = end.value > 0 ? end.putIn / end.value * 100 : 100;
+  $('bBal').textContent = usd0.format(end.value);
+  $('splitIn').style.width = inShare + '%';
+  $('splitDiv').style.width = (100 - inShare) + '%';
+  $('splitInP').textContent = Math.round(inShare) + '%';
+  $('splitDivP').textContent = Math.round(100 - inShare) + '%';
+
+  const yoc = rows.slice(1).map(r => r.putIn > 0 ? r.annual / r.putIn * 100 : 0);
+  $('sYoc').textContent = pct(yoc[yoc.length - 1] || 0, 1);
+  spark('vYoc', yoc, 'line');
+  $('capYoc').textContent = `Year 1: ${pct(yoc[0] || 0, 1)}. Year ${o.years}: ${pct(yoc[yoc.length - 1] || 0, 1)}.`;
+
+  const perPay = rows.slice(1).map(r => r.annual / o.periods);
+  $('sPayLbl').textContent = `Each ${payWord(o.periods)} payout in year ${o.years}`;
+  $('sPay').textContent = money(end.annual / o.periods);
+  spark('vPay', perPay, 'bars');
+  $('capPay').textContent = `${o.periods} payouts a year, one every ${payNoun(o.periods)}.`;
+
+  const taxes = rows.slice(1).map(r => r.cumTax);
+  $('sTax').textContent = usd0.format(res.totalTax);
+  spark('vTax', taxes, 'area', o.tax > 0 ? '#C77D34' : '#CBD3CF');
+  $('capTax').textContent = o.tax > 0 ? `At ${pct(o.tax, 1)} on every payout.`
+    : o.acct === 'roth' ? 'Roth: no tax on dividends.'
+    : o.acct === 'ira' ? 'Tax is deferred inside the account.'
+    : 'Set to 0%. Add your rate in Plan settings.';
+
+  // Goal ring + ladder
+  const netYield = o.yield * (1 - o.tax / 100);
+  const need = netYield > 0 ? o.goal * 12 / (netYield / 100) : null;
+  const prog = o.goal ? clamp(end.monthlyInc / o.goal, 0, 1) : 0;
+  $('ringFg').style.strokeDashoffset = (314.16 * (1 - prog)).toFixed(2);
+  $('ringVal').textContent = o.goal ? Math.round(prog * 100) + '%' : '—';
+  if (!o.goal) $('goalLine').textContent = 'Set a monthly goal in Plan settings to see when you reach it.';
+  else if (goalRow) $('goalLine').innerHTML = `You reach <b>${usd0.format(o.goal)} a month</b> in <b>year ${goalRow.year}</b>. At today's yield, that takes about <b>${need ? usd0.format(need) : '—'}</b> invested in ${esc(fund.sym)}.`;
+  else $('goalLine').innerHTML = `By year ${o.years} you're <b>${Math.round(prog * 100)}%</b> of the way to <b>${usd0.format(o.goal)} a month</b>. At today's yield, the full goal takes about <b>${need ? usd0.format(need) : '—'}</b> invested in ${esc(fund.sym)}.`;
+  const steps = [100, 500, 1000, 2500, 5000, 10000];
+  if (o.goal && !steps.includes(o.goal)) steps.push(o.goal);
+  steps.sort((a, b) => a - b);
+  $('ladder').innerHTML = steps.map(s => {
+    const hit = rows.find(r => r.year > 0 && r.monthlyInc >= s);
+    const w = clamp(end.monthlyInc / s * 100, 0, 100);
+    return `<li class="${s === o.goal ? 'is-goal' : ''}"><span class="amt">${usd0.format(s)} / mo</span><span class="bar"><i style="width:${w.toFixed(1)}%"></i></span><span class="yr ${hit ? 'hit' : ''}">${hit ? 'Year ' + hit.year : 'Not yet'}</span></li>`;
+  }).join('');
+
+  $('fee').innerHTML = fund.er !== null
+    ? `The ${pct(fund.er)} expense ratio costs about <b>${usd0.format(end.value * fund.er / 100)} a year</b> on your year-${o.years} balance. It's taken out before the fund pays, so the yield already includes it.`
+    : '';
+
+  $('yearsBody').innerHTML = rows.slice(1).map(r => `<tr class="${goalRow && goalRow.year === r.year ? 'goal-row' : ''}"><td>${r.year}</td><td>${usd0.format(r.putIn)}</td><td>${usd0.format(r.divYear)}</td><td class="strong">${money(r.monthlyInc)}</td><td>${usd0.format(r.value)}</td></tr>`).join('');
+
+  $('yieldNote').innerHTML = Math.abs(o.yield - fund.yield) > 0.004
+    ? `Edited. <button type="button" class="textlink" id="resetYield">Use live ${pct(fund.yield)}</button>`
+    : 'Live yield';
+  $('dotsTitle').textContent = `Every payout you'd receive over ${o.years} ${o.years === 1 ? 'year' : 'years'}`;
+
+  renderPeers(o);
+  if (typeof renderCovers === 'function') { if (cover.pending) { cover.pending = false; autoPlayCovers(); } else renderCovers(); }
+  chartTo(); dotsTo();
+  history.replaceState(null, '', '/?' + stateParams(fund.sym, true).toString());
+  firstRender = false;
+}
+
+/* Small sparkline visuals for the bento cards */
+function spark(id, vals, kind, color = '#15A374') {
+  const host = $(id); if (!host) return;
+  const W = 240, H = 58, n = vals.length, max = Math.max(...vals, 1e-9), min = kind === 'line' ? Math.min(...vals) : 0;
+  const x = i => n <= 1 ? W / 2 : (i / (n - 1)) * W;
+  const y = v => H - 4 - ((v - min) / ((max - min) || 1)) * (H - 10);
+  let s = '';
+  if (kind === 'bars') {
+    const bw = Math.max(1.5, W / n * 0.6);
+    vals.forEach((v, i) => { const xx = n <= 1 ? W / 2 : i / n * W + (W / n - bw) / 2; s += `<rect x="${xx.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - 4 - y(v)).toFixed(1)}" rx="1.5" fill="${color}" opacity="${0.35 + 0.65 * (i + 1) / n}"/>`; });
+  } else {
+    const d = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+    const gid = 'g' + id;
+    s += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".28"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
+    s += `<path d="${d}L${W},${H}L0,${H}Z" fill="url(#${gid})"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+    s += `<circle cx="${x(n - 1)}" cy="${y(vals[n - 1])}" r="3.5" fill="#fff" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+  }
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${s}</svg>`;
+}
+
+/* =====================================================================
+   FUND, PEERS, POPULAR
+   ===================================================================== */
+const badgeText = sym => sym.length > 4 ? sym.slice(0, 4) : sym;
+function renderFund() {
+  const f = state.fund;
+  const g = v => v ? `<span class="grade g-${v.toLowerCase()}">${esc(v)}</span>` : '—';
+  const items = [
+    ['Dividend yield', pct(f.yield)], ['Pays', f.freq ? esc(f.freq) : '—'], ['Payouts per year', String(f.periods)],
+    ['Expense ratio', pct(f.er)], ['Assets', f.aumText ? esc(f.aumText) : '—'], ['Launched', f.inception ? esc(f.inception) : '—'],
+    ['Total return since launch', pct(f.tr, 1)], ['Annualized return', f.ann !== null ? pct(f.ann, 1) : '—'], ['Provider', f.provider ? esc(f.provider) : '—'],
+    ['Tax grade', g(f.taxGrade)], ['Rating', g(f.rating)], ['Price decay', f.decay ? esc(f.decay) : '—']
+  ];
+  $('fundGrid').innerHTML = items.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  $('fundTitle').textContent = `About ${f.sym}`;
+  $('fundBadge').textContent = badgeText(f.sym);
+  $('fundName').textContent = f.name;
+  $('fundProv').textContent = [f.provider, f.freq && f.freq + ' payouts'].filter(Boolean).join(', ');
+}
+function renderPeers(o) {
+  const fund = state.fund;
+  const near = state.funds.filter(f => f.sym !== fund.sym && f.yield > 0)
+    .sort((a, b) => Math.abs(a.yield - fund.yield) - Math.abs(b.yield - fund.yield)).slice(0, 7);
+  const base = { ...o, divGrowth: 0 };
+  const list = [fund, ...near].map(f => {
+    const r = project({ ...(f === fund ? o : base), yield: f === fund ? o.yield : f.yield, periods: f.periods }).rows;
+    return { f, inc: r[r.length - 1].monthlyInc };
+  }).sort((a, b) => b.inc - a.inc);
+  const max = Math.max(...list.map(x => x.inc), 1);
+  $('peersSub').textContent = `Your exact plan with the funds closest in yield, showing monthly income in year ${o.years}. Select any fund to switch.`;
+  $('peersBody').innerHTML = list.map(x => {
+    const cur = x.f.sym === fund.sym, href = fundHref(x.f.sym);
+    return `<tr class="${cur ? 'current' : ''}" ${cur ? '' : `data-href="${href}"`}>
+      <td><span class="tick-cell"><span class="mini-badge">${esc(badgeText(x.f.sym))}</span>${cur ? `<strong>${esc(x.f.sym)}</strong> <span class="pill">Current</span>` : `<a href="${href}">${esc(x.f.sym)}</a>`}</span></td>
+      <td class="l pname">${esc(x.f.name)}</td>
+      <td>${pct(x.f.yield)}</td>
+      <td class="pbar"><span><i style="width:${(x.inc / max * 100).toFixed(1)}%"></i></span></td>
+      <td class="pinc">${money(x.inc)}${cur ? '' : '<span class="go" aria-hidden="true">›</span>'}</td></tr>`;
+  }).join('');
+}
+function renderPopular() {
+  const top = [...state.funds].sort((a, b) => b.aum - a.aum).filter(f => f.sym !== state.fund.sym).slice(0, 14);
+  $('popular').innerHTML = '<span>Most popular</span>' + top.map(f => `<a href="${fundHref(f.sym)}">${esc(f.sym)}</a>`).join('');
+}
+
+/* =====================================================================
+   MAIN CHART (SVG, tweened between states)
+   ===================================================================== */
+const chart = { from: null, to: null, topFrom: 0, topTo: 0, t0: 0, dur: 650, raf: 0, cur: null, top: 0 };
+function chartSeries() {
+  return state.rows.slice(1).map(r => state.mode === 'income' ? [r.monthlyInc, 0] : [r.putIn, r.value]);
+}
+function niceStep(max) {
+  const raw = max / 4, e = Math.pow(10, Math.floor(Math.log10(raw || 1))), f = raw / e;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e;
+}
+function chartTo(fromZero) {
+  const to = chartSeries(), o = readInputs();
+  const incMax = Math.max(...to.map(v => v[0]), 0);
+  const maxV = state.mode === 'income' ? Math.max(incMax, o.goal && o.goal < incMax * 1.6 ? o.goal : 0, 1) : Math.max(...to.map(v => v[1]), 1);
+  const step = niceStep(maxV * 1.04);
+  const topTo = Math.ceil(maxV * 1.04 / step) * step;
+  const same = chart.cur && chart.cur.length === to.length && !fromZero;
+  chart.from = same ? chart.cur.map(v => v.slice()) : to.map(() => [0, 0]);
+  chart.topFrom = same ? chart.top : topTo;
+  chart.to = to; chart.topTo = topTo; chart.step = step;
+  chart.t0 = performance.now();
+  cancelAnimationFrame(chart.raf);
+  const frame = now => {
+    const t = reduceMotion ? 1 : clamp((now - chart.t0) / chart.dur, 0, 1), e = easeOut(t);
+    chart.cur = chart.to.map((v, i) => [lerp(chart.from[i][0], v[0], e), lerp(chart.from[i][1], v[1], e)]);
+    chart.top = lerp(chart.topFrom, chart.topTo, e);
+    drawChart();
+    if (t < 1) chart.raf = requestAnimationFrame(frame);
+  };
+  chart.raf = requestAnimationFrame(frame);
+}
+function drawChart() {
+  const wrap = $('chartWrap'), svg = $('chart');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  if (!W || !chart.cur) return;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const o = readInputs(), N = chart.cur.length, top = chart.top || 1;
+  const pad = { l: 58, r: 12, t: 16, b: 30 }, pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  const slot = pw / Math.max(N, 1);
+  const x = yr => pad.l + (yr - 0.5) * slot;
+  const y = v => pad.t + ph - (Math.max(0, v) / top) * ph;
+  let s = `<title>${state.mode === 'income' ? 'Monthly dividend income by year' : 'Account balance by year'}</title>
+    <defs>
+      <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1DB981"/><stop offset="1" stop-color="#0E8A60"/></linearGradient>
+      <linearGradient id="barGh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0B7A55"/></linearGradient>
+      <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#DDE3E0"/><line x1="0" y1="0" x2="0" y2="6" stroke="#CBD3CF" stroke-width="2"/></pattern>
+    </defs>`;
+  const step = chart.step || niceStep(top);
+  for (let v = 0; v <= top + 1e-9; v += step) {
+    s += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v ? '#EDF0EE' : '#CFD7D3'}" ${v ? 'stroke-dasharray="2 4"' : ''}/>`;
+    s += `<text x="${pad.l - 12}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${compact(v)}</text>`;
+  }
+  const every = N <= 12 ? 1 : N <= 25 ? 5 : 10;
+  for (let yr = 1; yr <= N; yr++) if (yr === 1 || yr % every === 0) s += `<text x="${x(yr).toFixed(1)}" y="${H - 8}" text-anchor="middle">${every === 1 ? yr : 'Yr ' + yr}</text>`;
+  const bw = Math.max(2, Math.min(30, slot * 0.66)), rad = Math.min(5, bw / 2.4);
+  const bar = (cx, t, b, fill, op, round) => {
+    const h = b - t; if (h <= 0.3) return '';
+    if (!round || h < rad) return `<rect x="${(cx - bw / 2).toFixed(1)}" y="${t.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" opacity="${op}"/>`;
+    const l = cx - bw / 2, r = cx + bw / 2;
+    return `<path d="M${l.toFixed(1)},${b.toFixed(1)}V${(t + rad).toFixed(1)}Q${l.toFixed(1)},${t.toFixed(1)} ${(l + rad).toFixed(1)},${t.toFixed(1)}H${(r - rad).toFixed(1)}Q${r.toFixed(1)},${t.toFixed(1)} ${r.toFixed(1)},${(t + rad).toFixed(1)}V${b.toFixed(1)}Z" fill="${fill}" opacity="${op}"/>`;
+  };
+  const hv = state.hoverYear;
+  if (hv) s += `<rect x="${(x(hv) - slot / 2).toFixed(1)}" y="${pad.t}" width="${slot.toFixed(1)}" height="${ph}" fill="#0B1F1A" opacity=".035" rx="6"/>`;
+  chart.cur.forEach((v, i) => {
+    const yr = i + 1, active = hv === yr, op = hv === null || active ? 1 : 0.45;
+    if (state.mode === 'income') s += bar(x(yr), y(v[0]), y(0), active ? 'url(#barGh)' : 'url(#barG)', op, true);
+    else {
+      const earned = v[1] - v[0];
+      s += bar(x(yr), y(v[0]), y(0), 'url(#hatch)', op, earned <= 0.5);
+      if (earned > 0.5) s += bar(x(yr), y(v[1]), y(v[0]) - 1, active ? 'url(#barGh)' : 'url(#barG)', op, true);
+    }
+  });
+  if (state.mode === 'income' && o.goal && o.goal <= top) {
+    const gy = y(o.goal).toFixed(1);
+    s += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${gy}" y2="${gy}" stroke="#0B1F1A" stroke-width="1.2" stroke-dasharray="5 5"/>`;
+    const label = `Goal ${compact(o.goal)}/mo`, lw = label.length * 6.6 + 16;
+    s += `<rect x="${pad.l + 6}" y="${gy - 11}" width="${lw}" height="22" rx="11" fill="#0B1F1A"/><text x="${pad.l + 6 + lw / 2}" y="${+gy + 4}" text-anchor="middle" style="fill:#fff;font-weight:600;font-size:11.5px">${label}</text>`;
+  }
+  svg.innerHTML = s;
+  chart.geom = { x, pad, slot, N };
+  $('legend').innerHTML = state.mode === 'income'
+    ? `<span><i style="background:#15A374"></i>Monthly income</span>${o.goal ? '<span><i style="background:#0B1F1A;height:2px;border-radius:1px;vertical-align:3px"></i>Goal</span>' : ''}`
+    : `<span><i style="background:#CBD3CF"></i>Money you put in</span><span><i style="background:#15A374"></i>Dividends ${o.drip ? 'reinvested' : 'collected'}</span>`;
+}
+function showTip(yr) {
+  const r = state.rows[yr]; if (!r) return;
+  state.hoverYear = yr; drawChart();
+  const tip = $('tip');
+  tip.innerHTML = `<b>Year ${yr}</b>
+    <div><span>Monthly income</span><span>${money(r.monthlyInc)}</span></div>
+    <div><span>Yearly income</span><span>${usd0.format(r.annual)}</span></div>
+    <div><span>Balance</span><span>${usd0.format(r.value)}</span></div>
+    <div><span>Money put in</span><span>${usd0.format(r.putIn)}</span></div>`;
+  const W = $('chartWrap').clientWidth, px = chart.geom.x(yr), tw = tip.offsetWidth || 210;
+  tip.style.left = (px + 18 + tw > W ? px - tw - 18 : px + 18) + 'px';
+  tip.classList.add('show');
+}
+function hideTip() { state.hoverYear = null; $('tip').classList.remove('show'); drawChart(); }
+const yearAt = (e, wrap, g) => clamp(Math.floor((e.clientX - wrap.getBoundingClientRect().left - g.pad.l) / g.slot) + 1, 1, g.N);
+(() => {
+  const cw = $('chartWrap');
+  cw.addEventListener('pointermove', e => chart.geom && showTip(yearAt(e, cw, chart.geom)));
+  cw.addEventListener('pointerdown', e => chart.geom && showTip(yearAt(e, cw, chart.geom)));
+  cw.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideTip(); });
+  cw.addEventListener('blur', hideTip);
+  cw.addEventListener('keydown', e => {
+    if (!chart.geom) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const cur = state.hoverYear ?? (e.key === 'ArrowRight' ? 0 : chart.geom.N + 1);
+      showTip(clamp(cur + (e.key === 'ArrowRight' ? 1 : -1), 1, chart.geom.N));
+    } else if (e.key === 'Escape') hideTip();
+  });
+})();
+
+/* =====================================================================
+   PAYOUT DOT MAP (canvas). One column per year, one dot per payout.
+   Dot area scales with the payout, so the snowball is visible at a glance.
+   ===================================================================== */
+const dots = { from: null, to: null, cur: null, t0: 0, raf: 0, dur: 900, intro: true };
+function dotsTo() {
+  const rows = state.rows.slice(1);
+  const grp = rows[0] && rows[0].payouts.length > 26 ? 4 : 1;   // weekly: one dot per 4 payouts
+  dots.grp = grp;
+  const to = rows.map(r => { const g = []; for (let k = 0; k < r.payouts.length; k += grp) g.push(r.payouts.slice(k, k + grp).reduce((a, b) => a + b, 0)); return g; });
+  $('dotsLegend').textContent = grp > 1 ? `Each dot is ${grp} weekly payouts` : 'Each dot is one payout';
+  const same = dots.cur && dots.cur.length === to.length && dots.cur[0] && dots.cur[0].length === to[0].length;
+  dots.from = same ? dots.cur.map(c => c.slice()) : to.map(c => c.map(() => 0));
+  dots.to = to; dots.max = Math.max(...to.map(c => Math.max(...c)), 1e-9);
+  dots.maxFrom = same ? dots.maxCur : dots.max;
+  dots.t0 = performance.now();
+  const introNow = dots.intro && !same; dots.intro = false;
+  cancelAnimationFrame(dots.raf);
+  const N = to.length;
+  const frame = now => {
+    let done = true;
+    dots.cur = dots.to.map((col, i) => {
+      const delay = introNow ? i / Math.max(N, 1) * 700 : 0;
+      const t = reduceMotion ? 1 : clamp((now - dots.t0 - delay) / dots.dur, 0, 1);
+      if (t < 1) done = false;
+      const e = easeOut(t);
+      return col.map((v, k) => lerp(dots.from[i][k] || 0, v, e));
+    });
+    const tm = reduceMotion ? 1 : clamp((now - dots.t0) / dots.dur, 0, 1);
+    dots.maxCur = lerp(dots.maxFrom, dots.max, easeOut(tm));
+    drawDots();
+    if (!done) dots.raf = requestAnimationFrame(frame);
+  };
+  dots.raf = requestAnimationFrame(frame);
+}
+function drawDots() {
+  const c = $('dots'), wrap = $('dotsWrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight, dpr = Math.min(devicePixelRatio || 1, 2);
+  if (!W || !dots.cur) return;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const N = dots.cur.length, P = dots.cur[0] ? dots.cur[0].length : 1;
+  const padB = 22, colW = W / N, rowH = (H - padB) / P;
+  const rMax = Math.max(1.2, Math.min(colW, rowH) / 2 * 0.86);
+  const maxV = dots.maxCur || 1;
+  dots.geom = { colW, N, rowH, padB, W, H };
+  const hv = state.dotHover;
+  if (hv) { ctx.fillStyle = 'rgba(208,240,226,0.06)'; roundRect(ctx, (hv - 1) * colW + 1, 0, colW - 2, H - padB + 2, 8); ctx.fill(); }
+  for (let i = 0; i < N; i++) {
+    const cx = (i + 0.5) * colW, dim = hv && hv !== i + 1;
+    for (let k = 0; k < P; k++) {
+      const v = dots.cur[i][k], rel = Math.sqrt(clamp(v / maxV, 0, 1));
+      const cy = H - padB - (k + 0.5) * rowH;
+      ctx.beginPath(); ctx.arc(cx, cy, Math.max(0.8, rMax * 0.18), 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(208,240,226,0.08)'; ctx.fill();
+      if (rel > 0.001) {
+        const r = Math.max(0.9, rMax * rel);
+        const g = Math.round(lerp(120, 240, rel)), b = Math.round(lerp(96, 196, rel)), rr = Math.round(lerp(26, 120, rel));
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rr},${g},${b},${dim ? 0.3 : lerp(0.55, 1, rel)})`;
+        ctx.fill();
+      }
+    }
+  }
+  ctx.fillStyle = '#93ADA4'; ctx.font = '500 11px Geist, system-ui, sans-serif'; ctx.textAlign = 'center';
+  const every = N <= 12 ? 1 : N <= 25 ? 5 : 10;
+  for (let yr = 1; yr <= N; yr++) if (yr === 1 || yr % every === 0) {
+    const label = every === 1 ? String(yr) : 'Yr ' + yr, lx = (yr - 0.5) * colW, half = ctx.measureText(label).width / 2;
+    ctx.fillText(label, clamp(lx, half + 1, W - half - 1), H - 6);
+  }
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function showDotTip(yr) {
+  const r = state.rows[yr]; if (!r || !dots.geom) return;
+  state.dotHover = yr; drawDots();
+  const tip = $('dtip'), P = r.payouts.length;
+  tip.innerHTML = `<b>Year ${yr}</b>
+    <div><span>Payouts</span><span>${P}</span></div>
+    <div><span>Each payout</span><span>${money(r.payouts[P - 1])}</span></div>
+    <div><span>Total that year</span><span>${usd0.format(r.divYear)}</span></div>`;
+  const px = (yr - 0.5) * dots.geom.colW, tw = tip.offsetWidth || 180;
+  tip.style.left = (px + 16 + tw > dots.geom.W ? px - tw - 16 : px + 16) + 'px';
+  tip.classList.add('show');
+}
+function hideDotTip() { state.dotHover = null; $('dtip').classList.remove('show'); drawDots(); }
+(() => {
+  const dw = $('dotsWrap');
+  const at = e => dots.geom ? clamp(Math.floor((e.clientX - dw.getBoundingClientRect().left) / dots.geom.colW) + 1, 1, dots.geom.N) : null;
+  dw.addEventListener('pointermove', e => { const y = at(e); if (y) showDotTip(y); });
+  dw.addEventListener('pointerdown', e => { const y = at(e); if (y) showDotTip(y); });
+  dw.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideDotTip(); });
+  dw.addEventListener('blur', hideDotTip);
+  dw.addEventListener('keydown', e => {
+    if (!dots.geom) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const cur = state.dotHover ?? (e.key === 'ArrowRight' ? 0 : dots.geom.N + 1);
+      showDotTip(clamp(cur + (e.key === 'ArrowRight' ? 1 : -1), 1, dots.geom.N));
+    } else if (e.key === 'Escape') hideDotTip();
+  });
+})();
+
+/* =====================================================================
+   SHARE IMAGE (1200 x 675 PNG for X, Instagram, etc.)
+   ===================================================================== */
+async function makeShareImage() {
+  const o = readInputs(), f = state.fund, rows = state.rows, end = rows[rows.length - 1];
+  const W = 1200, H = 675, c = document.createElement('canvas');
+  c.width = W * 2; c.height = H * 2;
+  const ctx = c.getContext('2d'); ctx.scale(2, 2);
+  try { await document.fonts.load('600 40px Geist'); } catch (e) {}
+  const F = (w, s) => `${w} ${s}px Geist, system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = '#0B1F1A'; ctx.fillRect(0, 0, W, H);
+  let g = ctx.createRadialGradient(0, 0, 0, 0, 0, 800); g.addColorStop(0, 'rgba(91,227,180,.20)'); g.addColorStop(1, 'rgba(91,227,180,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // Brand
+  ctx.fillStyle = '#EAF3EF'; ctx.font = F(600, 24); ctx.textAlign = 'left'; ctx.fillText('DividendProjection', 72, 86);
+  ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 20); ctx.textAlign = 'right'; ctx.fillText('dividendprojection.com', W - 72, 86);
+  // Sentence
+  ctx.textAlign = 'left'; ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 30);
+  ctx.fillText(`${usd0.format(o.start)} today + ${usd0.format(o.monthly)}/mo in ${f.sym} for ${o.years} ${o.years === 1 ? 'year' : 'years'}`, 72, 186);
+  ctx.fillText('could pay me', 72, 228);
+  // Number
+  const txt = money(end.monthlyInc);
+  let size = 168; ctx.font = F(600, size);
+  while (ctx.measureText(txt).width > 760 && size > 60) { size -= 4; ctx.font = F(600, size); }
+  ctx.fillStyle = '#FFFFFF'; ctx.fillText(txt, 66, 228 + size * 0.95);
+  const tw = ctx.measureText(txt).width;
+  ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 30); ctx.fillText('/month', 66 + tw + 14, 228 + size * 0.95);
+  // Mini bars
+  const bars = rows.slice(1).map(r => r.monthlyInc), max = Math.max(...bars, 1);
+  const bx = 72, by = H - 72, bwAll = W - 144, bh = 150, n = bars.length, slot = bwAll / n, bw = Math.min(26, slot * .64);
+  bars.forEach((v, i) => {
+    const h = Math.max(2, v / max * bh), x = bx + i * slot + (slot - bw) / 2;
+    const gg = ctx.createLinearGradient(0, by - h, 0, by); gg.addColorStop(0, '#5BE3B4'); gg.addColorStop(1, '#0E8A60');
+    ctx.fillStyle = gg; roundRect(ctx, x, by - h, bw, h, Math.min(5, bw / 2.4)); ctx.fill();
+  });
+  // Facts
+  ctx.textAlign = 'right'; ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 20);
+  ctx.fillText(`${pct(o.yield)} yield, paid ${payWord(o.periods)}`, W - 72, 186);
+  ctx.fillText(`${usd0.format(end.value)} balance in year ${o.years}`, W - 72, 220);
+  const a = document.createElement('a');
+  a.download = `${f.sym}-dividend-projection.png`;
+  a.href = c.toDataURL('image/png');
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Share image downloaded');
+}
+
+/* =====================================================================
+   FUND PICKER
+   ===================================================================== */
+let items = [], active = -1, lastFocus = null;
+function search(q) {
+  q = q.trim().toLowerCase();
+  if (!q) return [...state.funds].sort((a, b) => b.aum - a.aum).slice(0, 8);
+  const a = [], b = [], c = [];
+  state.funds.forEach(f => {
+    const s = f.sym.toLowerCase();
+    if (s === q) a.push(f); else if (s.startsWith(q)) b.push(f);
+    else if (f.name.toLowerCase().includes(q) || f.provider.toLowerCase().includes(q)) c.push(f);
+  });
+  return [...a, ...b, ...c].slice(0, 8);
+}
+function paintList() {
+  const q = $('q').value;
+  items = search(q); active = items.length ? 0 : -1;
+  $('sugg').innerHTML = !state.funds.length ? '<li class="s-empty">Loading funds…</li>'
+    : !items.length ? `<li class="s-empty">No fund matches "${esc(q)}". Try a ticker like SCHD or JEPI.</li>`
+    : items.map((f, i) => `<li role="option" id="opt${i}" data-sym="${esc(f.sym)}" aria-selected="${i === active}"><span class="mini-badge">${esc(badgeText(f.sym))}</span><span class="s-sym">${esc(f.sym)}</span><span class="s-name">${esc(f.name)}</span><span class="s-yld">${pct(f.yield)}</span></li>`).join('');
+  $('q').setAttribute('aria-activedescendant', active >= 0 ? 'opt' + active : '');
+}
+function move(d) {
+  if (!items.length) return;
+  active = (active + d + items.length) % items.length;
+  document.querySelectorAll('#sugg li[role=option]').forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
+  $('q').setAttribute('aria-activedescendant', 'opt' + active);
+  $('opt' + active)?.scrollIntoView({ block: 'nearest' });
+}
+function openPicker() { lastFocus = document.activeElement; $('palette').hidden = false; $('q').value = ''; paintList(); $('q').focus(); document.body.style.overflow = 'hidden'; }
+function closePicker() { $('palette').hidden = true; document.body.style.overflow = ''; lastFocus?.focus(); }
+$('fundBtn').addEventListener('click', openPicker);
+$('changeFund').addEventListener('click', openPicker);
+$('paletteBg').addEventListener('click', closePicker);
+$('q').addEventListener('input', paintList);
+$('q').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+  else if (e.key === 'Escape') { e.preventDefault(); closePicker(); }
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    const exact = state.funds.find(f => f.sym === $('q').value.trim().toUpperCase());
+    if (exact) goTo(exact.sym); else if (items[active]) goTo(items[active].sym);
+  } else if (e.key === 'Tab') e.preventDefault();
+});
+$('sugg').addEventListener('click', e => { const li = e.target.closest('li[data-sym]'); if (li) goTo(li.dataset.sym); });
+$('sugg').addEventListener('mousemove', e => {
+  const li = e.target.closest('li[data-sym]'); if (!li) return;
+  const i = [...$('sugg').children].indexOf(li); if (i !== active) { active = i - 1; move(1); }
+});
+document.addEventListener('keydown', e => {
+  const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+  if (!typing && $('palette').hidden && (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'))) { e.preventDefault(); openPicker(); }
+});
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+['start', 'monthly'].forEach(id => {
+  const el = $(id);
+  el.addEventListener('input', () => { el.value = el.value.replace(/[^\d,]/g, ''); autosize(el); render(); });
+  el.addEventListener('blur', () => { el.value = commas(moneyVal(id)); autosize(el); });
+});
+$('years').addEventListener('input', () => { $('years').value = $('years').value.replace(/\D/g, '').slice(0, 2); autosize($('years')); render(); });
+$('years').addEventListener('blur', () => { $('years').value = clamp(parseInt($('years').value, 10) || 1, 1, 50); autosize($('years')); render(); });
+['tax', 'yield', 'divg', 'cinc', 'goal'].forEach(id => $(id).addEventListener('input', render));
+document.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
+  // Whole-number steps: 2 -> 3, and a typed 2.5 snaps to 3 (up) or 2 (down)
+  const inp = $(b.dataset.step), v = num(inp.value) || 0, d = parseFloat(b.dataset.d);
+  inp.value = d > 0 ? Math.floor(v) + 1 : Math.ceil(v) - 1;
+  render();
+}));
+function toggleDrip() {
+  const on = $('drip').getAttribute('aria-checked') !== 'true';
+  $('drip').setAttribute('aria-checked', String(on));
+  render();
+}
+// One handler for the whole row (text + switch), so a click anywhere toggles exactly once
+$('dripRow').addEventListener('click', toggleDrip);
+$('acct').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { setAcct(b.dataset.v); render(); } });
+$('yieldNote').addEventListener('click', e => { if (e.target.id === 'resetYield') { $('yield').value = +state.fund.yield.toFixed(2); render(); } });
+$('mode').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.mode = b.dataset.v; setSeg('mode', state.mode);
+  state.hoverYear = null; $('tip').classList.remove('show');
+  $('chartTitleH').textContent = state.mode === 'income' ? 'Your income, year by year' : 'Your balance, year by year';
+  $('chartSubtitle').textContent = state.mode === 'income' ? 'Monthly dividend income at the end of each year' : 'What you put in, plus the dividends it earned';
+  chartTo(true);
+});
+$('peersBody').addEventListener('click', e => { const tr = e.target.closest('tr[data-href]'); if (tr && !e.target.closest('a')) location.href = tr.dataset.href; });
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
+$('shareBtn').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(location.href); toast('Link copied'); } catch { toast('Copy the address bar to share'); }
+});
+$('shareImg').addEventListener('click', () => { if (state.fund) makeShareImage(); });
+
+addEventListener('scroll', () => $('siteHeader').classList.toggle('scrolled', scrollY > 8), { passive: true });
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { sizeAll(); fitBig(); placePill($('mode')); placePill($('acct')); drawChart(); drawDots(); }, 80); });
+
+/* Decorative dot cluster on the PRO banner */
+(() => {
+  let s = '';
+  for (let c = 0; c < 11; c++) for (let r = 0; r < 6; r++) {
+    const v = (c + 1) / 11 * (0.4 + 0.6 * Math.random());
+    s += `<circle cx="${10 + c * 20}" cy="${110 - r * 20}" r="${(1.2 + v * 6).toFixed(1)}" fill="#5BE3B4" opacity="${(0.15 + v * 0.6).toFixed(2)}"/>`;
+  }
+  $('proDots').innerHTML = s;
+})();
+
+/* =====================================================================
+   WHAT YOUR DIVIDENDS COULD PAY FOR
+   Public U.S. averages (monthly). Visitors can type their own amount.
+   ===================================================================== */
+const IC = {
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  bolt: '<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6l1-8Z"/>',
+  shield: '<path d="M12 3 5 6v5.5c0 4.3 3 7.7 7 9.5 4-1.8 7-5.2 7-9.5V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>',
+  cart: '<path d="M3 4h2l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.2"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+  car: '<path d="M5 16.5v2M19 16.5v2M4 16.5h16v-4.2a2 2 0 0 0-.4-1.2l-2.1-2.9a2 2 0 0 0-1.6-.8H8.1a2 2 0 0 0-1.6.8l-2.1 2.9a2 2 0 0 0-.4 1.2v4.2Z"/><circle cx="8" cy="13.5" r="1"/><circle cx="16" cy="13.5" r="1"/>',
+  home: '<path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5Z"/>',
+  bank: '<path d="M3.5 9 12 4l8.5 5M5 9v9M9.5 9v9M14.5 9v9M19 9v9M3.5 20.5h17"/>',
+  work: '<rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17"/>'
+};
+const svgIc = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+// Update these numbers whenever newer figures come out.
+const EXPENSES = [
+  { id: 'phone',  name: 'Phone bill',            avg: 141,  icon: 'phone',  src: 'J.D. Power, 2026',               url: 'https://www.t-mobile.com/dialed-in/wireless/average-phone-bill-per-month' },
+  { id: 'power',  name: 'Electric bill',         avg: 155,  icon: 'bolt',   src: 'U.S. EIA, June 2026',            url: 'https://electricityplans.com/average-electricity-bill-usage-rate-by-state/' },
+  { id: 'ins',    name: 'Car insurance',         avg: 187,  icon: 'shield', src: 'Insurify, full coverage, Sept 2026', url: 'https://insurify.com/car-insurance/average-car-insurance-cost/' },
+  { id: 'food',   name: 'Groceries',             avg: 519,  icon: 'cart',   src: 'BLS Consumer Expenditure Survey ($6,224 a year)', url: 'https://www.bls.gov/opub/ted/2026/housing-and-transportation-accounted-for-50-percent-of-household-spending-in-2024.htm' },
+  { id: 'car',    name: 'New car payment',       avg: 765,  icon: 'car',    src: 'Experian, Q2 2026',              url: 'https://www.experian.com/blogs/ask-experian/average-car-payment/' },
+  { id: 'rent',   name: 'Rent',                  avg: 1390, icon: 'home',   src: 'Apartment List national median, Aug 2026', url: 'https://www.apartmentlist.com/research/national-rent-data' },
+  { id: 'ss',     name: 'Social Security check', avg: 2086, icon: 'bank',   src: 'SSA retired-worker average, July 2026', url: 'https://www.kiplinger.com/retirement/social-security/average-monthly-social-security-check' },
+  { id: 'salary', name: 'Median full-time salary', avg: 5421, icon: 'work', src: 'BLS, Q2 2026 ($1,251 a week before tax)', url: 'https://www.bls.gov/news.release/wkyeng.nr0.htm' }
+].map(e => ({ ...e, amt: e.avg }));
+
+const cover = { year: null, moved: false, visible: false, playing: false, shown: {}, pctShown: {}, built: false, raf: {} };
+
+function buildCovers() {
+  $('coverGrid').innerHTML = EXPENSES.map(e => `
+    <article class="card cover" id="cv-${e.id}">
+      <div class="cover-top"><span class="cover-ic">${svgIc(e.icon)}</span><span class="cover-name">${e.name}</span></div>
+      <span class="cover-check" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.2 2.3 2.3 4.7-5"/></svg></span>
+      <div class="cover-amt"><label title="Type your own amount">$<input type="text" inputmode="numeric" data-exp="${e.id}" value="${commas(e.amt)}" aria-label="${e.name} per month"></label><span>/mo</span><span class="cover-tag" data-tag="${e.id}">US avg</span></div>
+      <div class="cover-pct"><span data-pct="${e.id}">0%</span><small>covered</small></div>
+      <div class="cover-bar"><i data-bar="${e.id}"></i></div>
+      <div class="cover-status" data-status="${e.id}">&nbsp;</div>
+    </article>`).join('');
+  $('coverDots').innerHTML = EXPENSES.map(e => `<span class="cover-dot" data-dot="${e.id}" title="${e.name}">${svgIc(e.icon)}</span>`).join('');
+  $('coverSources').innerHTML = 'Averages: ' + EXPENSES.map(e => `${e.name.toLowerCase()}, <a href="${e.url}" target="_blank" rel="noopener">${e.src}</a>`).join('; ') + '. Salary is before tax. Your own costs may be higher or lower.';
+  cover.built = true;
+}
+
+// Size each amount field to its text so "/mo" sits right after the number
+const amtCtx = document.createElement('canvas').getContext('2d');
+function sizeAmt(inp) {
+  amtCtx.font = '600 14px Geist, system-ui, sans-serif';
+  // Page uses tabular figures, so every digit is as wide as a "0"
+  const v = inp.value || '0', digits = (v.match(/\d/g) || []).length, rest = v.replace(/\d/g, '');
+  inp.style.width = Math.ceil(digits * amtCtx.measureText('0').width + amtCtx.measureText(rest).width + 3) + 'px';
+}
+function tweenPct(id, to) {
+  const el = document.querySelector(`[data-pct="${id}"]`); if (!el) return;
+  const from = cover.pctShown[id] ?? 0;
+  cancelAnimationFrame(cover.raf[id]);
+  const t0 = performance.now(), dur = reduceMotion ? 0 : 700;
+  const fmt = v => v >= 1000 ? commas(v) + '%' : Math.round(v) + '%';
+  const step = now => {
+    const t = dur ? clamp((now - t0) / dur, 0, 1) : 1, v = lerp(from, to, easeOut(t));
+    el.textContent = fmt(v); cover.pctShown[id] = v;
+    if (t < 1) cover.raf[id] = requestAnimationFrame(step);
+  };
+  cover.raf[id] = requestAnimationFrame(step);
+}
+
+function renderCovers() {
+  if (!cover.built || !state.rows.length) return;
+  const N = state.rows.length - 1;
+  const slider = $('coverYear');
+  slider.max = N;
+  if (!cover.moved || cover.year > N || cover.year === null) cover.year = N;
+  slider.value = cover.year;
+  slider.style.setProperty('--p', (N > 1 ? (cover.year - 1) / (N - 1) * 100 : 100) + '%');
+  $('coverYearVal').textContent = cover.year;
+  const y = cover.year, inc = state.rows[y].monthlyInc;
+  let coveredCount = 0, total = 0;
+  EXPENSES.forEach(e => {
+    const ratio = e.amt > 0 ? inc / e.amt : 0, isCovered = ratio >= 1 && e.amt > 0;
+    total += e.amt;
+    if (isCovered) coveredCount++;
+    const firstYear = state.rows.find(r => r.year > 0 && r.monthlyInc >= e.amt);
+    const card = $('cv-' + e.id), bar = document.querySelector(`[data-bar="${e.id}"]`);
+    const shownPct = cover.visible ? Math.min(ratio * 100, 100) : 0;   // tops out at 100%; the multiple shows in the status line
+    bar.style.width = shownPct + '%';
+    tweenPct(e.id, shownPct);
+    const inp = document.querySelector(`[data-exp="${e.id}"]`);
+    if (inp) sizeAmt(inp);
+    const was = cover.shown[e.id];
+    card.classList.toggle('covered', cover.visible && isCovered);
+    if (cover.visible && isCovered && was === false) { card.classList.remove('just'); card.offsetWidth; card.classList.add('just'); }
+    cover.shown[e.id] = cover.visible ? isCovered : false;
+    const dot = document.querySelector(`[data-dot="${e.id}"]`);
+    const dotWas = dot.classList.contains('on');
+    dot.classList.toggle('on', cover.visible && isCovered);
+    if (cover.visible && isCovered && !dotWas) { dot.classList.remove('pop'); dot.offsetWidth; dot.classList.add('pop'); }
+    let status;
+    if (isCovered) {
+      const times = ratio >= 2 ? ` That's <b>${ratio >= 10 ? Math.round(ratio) : ratio.toFixed(1)}x</b> the bill.` : '';
+      status = `<b>Fully covered</b>${firstYear ? ` since year ${firstYear.year}` : ''}.${times}`;
+    } else if (e.amt <= 0) status = 'Enter an amount to compare.';
+    else {
+      const short = e.amt - inc;
+      status = `<b>${money(short)}</b> a month short.` + (firstYear ? ` Covered in year ${firstYear.year}.` : ` Not covered within ${N} ${N === 1 ? 'year' : 'years'}.`);
+    }
+    document.querySelector(`[data-status="${e.id}"]`).innerHTML = status;
+    const tag = document.querySelector(`[data-tag="${e.id}"]`);
+    const mine = e.amt !== e.avg;
+    tag.textContent = mine ? 'Yours · reset' : 'US avg';
+    tag.classList.toggle('mine', mine);
+    tag.title = mine ? `Reset to the U.S. average of ${usd0.format(e.avg)}` : e.src;
+  });
+  const share = total > 0 ? inc / total * 100 : 0;
+  $('coverLine').innerHTML = `In year ${y}, your dividends fully cover <b>${coveredCount} of ${EXPENSES.length}</b> of these expenses.` +
+    `<small>All ${EXPENSES.length} together cost <b>${usd0.format(total)}</b> a month. Your <b>${money(inc)}</b> a month covers <b>${pct(share, 0)}</b> of that.</small>`;
+}
+
+// Plays year 1 to the final year once, automatically, the first time the section scrolls into view
+function autoPlayCovers() {
+  const N = state.rows.length - 1;
+  cover.visible = true;
+  if (N < 2 || reduceMotion) { cover.moved = false; renderCovers(); return; }
+  cover.playing = true; cover.moved = true;
+  let yr = 1;
+  const stepMs = clamp(2600 / N, 90, 420);
+  cover.year = yr; renderCovers();
+  cover.timer = setInterval(() => {
+    yr++;
+    if (yr > N) { stopPlay(); return; }
+    cover.year = yr; renderCovers();
+  }, stepMs);
+  track('coverage_autoplayed', { years: N });
+}
+function stopPlay() {
+  clearInterval(cover.timer);
+  if (cover.playing) { cover.playing = false; cover.moved = false; }   // back to following the plan's final year
+}
+
+buildCovers();
+$('coverYear').addEventListener('input', e => { stopPlay(); cover.moved = true; cover.visible = true; cover.year = parseInt(e.target.value, 10); renderCovers(); });
+$('coverGrid').addEventListener('input', e => {
+  const inp = e.target.closest('[data-exp]'); if (!inp) return;
+  inp.value = inp.value.replace(/[^\d,]/g, '');
+  sizeAmt(inp);
+  const ex = EXPENSES.find(x => x.id === inp.dataset.exp);
+  ex.amt = Math.max(0, num(inp.value) || 0);
+  renderCovers();
+});
+$('coverGrid').addEventListener('change', e => {
+  const inp = e.target.closest('[data-exp]'); if (!inp) return;
+  inp.value = commas(num(inp.value) || 0);
+  track('expense_edited', { expense: inp.dataset.exp });
+});
+$('coverGrid').addEventListener('click', e => {
+  const tag = e.target.closest('.cover-tag.mine'); if (!tag) return;
+  const ex = EXPENSES.find(x => x.id === tag.dataset.tag);
+  ex.amt = ex.avg;
+  document.querySelector(`[data-exp="${ex.id}"]`).value = commas(ex.avg);
+  renderCovers();
+});
+// Bars fill in the first time the section scrolls into view
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(entries => {
+    if (entries.some(en => en.isIntersecting)) { io.disconnect(); if (state.rows.length) autoPlayCovers(); else cover.pending = true; }
+  }, { threshold: 0, rootMargin: '0px 0px -18% 0px' });
+  io.observe($('coverGrid'));
+} else cover.pending = true;
+
+/* =====================================================================
+   ANALYTICS EVENTS (GA4)
+   Engagement events, separate from page views. Until GA_ID is filled in at
+   the top of the file, track() does nothing, so this is safe to ship now.
+   Every event includes the current fund as "etf".
+   ===================================================================== */
+const counts = { plan: 0 };
+function track(name, params = {}) {
+  if (typeof window.gtag !== 'function') return;
+  gtag('event', name, { etf: state.fund ? state.fund.sym : '', transport_type: 'beacon', ...params });
+}
+// One event per setting per burst of changes, so typing "10000" or tapping +++ counts once
+const planTimers = {};
+function planChanged(setting) {
+  clearTimeout(planTimers[setting]);
+  planTimers[setting] = setTimeout(() => {
+    counts.plan++;
+    track('plan_changed', { setting, changes_this_page: counts.plan });
+  }, 1200);
+}
+// Text and number fields: "change" fires once the visitor finishes editing
+[['start', 'starting_amount'], ['monthly', 'monthly_deposit'], ['years', 'years'], ['tax', 'tax_rate'],
+ ['yield', 'yield'], ['divg', 'dividend_growth'], ['cinc', 'deposit_raise'], ['goal', 'income_goal']]
+  .forEach(([id, name]) => $(id).addEventListener('change', () => planChanged(name)));
+document.querySelectorAll('[data-step="divg"]').forEach(b => b.addEventListener('click', () => planChanged('dividend_growth')));
+$('dripRow').addEventListener('click', () => planChanged('reinvest_dividends'));
+$('acct').addEventListener('click', e => { if (e.target.closest('button')) planChanged('account_type'); });
+
+// Fund switches from the comparison table and popular chips (search is tracked in goTo)
+document.addEventListener('click', e => {
+  const el = e.target.closest('#peersBody tr[data-href], #peersBody a, #popular a');
+  if (!el) return;
+  const href = el.getAttribute('href') || el.dataset.href || '';
+  const to = new URLSearchParams(href.split('?')[1] || '').get('etf') || '';
+  track('fund_switched', { to_etf: to, source: el.closest('#popular') ? 'popular' : 'compare' });
+}, true);
+
+// Sharing and exploring
+$('shareImg').addEventListener('click', () => track('share_image_downloaded'));
+$('shareBtn').addEventListener('click', () => track('link_copied'));
+$('changeFund').addEventListener('click', () => track('fund_search_opened', { source: 'button' }));
+$('fundBtn').addEventListener('click', () => track('fund_search_opened', { source: 'sentence' }));
+$('mode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) track('chart_view_changed', { view: b.dataset.v }); });
+document.querySelector('.years-card details').addEventListener('toggle', e => { if (e.target.open) track('year_table_opened'); });
+// First time a visitor explores each chart on this page
+let exploredChart = false, exploredDots = false;
+$('chartWrap').addEventListener('pointerdown', () => { if (!exploredChart) { exploredChart = true; track('chart_explored', { chart: 'income' }); } });
+$('chartWrap').addEventListener('pointermove', () => { if (!exploredChart) { exploredChart = true; track('chart_explored', { chart: 'income' }); } });
+$('dotsWrap').addEventListener('pointermove', () => { if (!exploredDots) { exploredDots = true; track('chart_explored', { chart: 'payout_dots' }); } });
+$('dotsWrap').addEventListener('pointerdown', () => { if (!exploredDots) { exploredDots = true; track('chart_explored', { chart: 'payout_dots' }); } });
+
+// Clicks through to TopDividendETFs PRO (your own funnel)
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href*="topdividendetfspro.com"]');
+  if (!a) return;
+  const where = a.classList.contains('eyebrow-live') ? 'data_badge' : a.classList.contains('nav-pro') ? 'header' : a.closest('.pro') ? 'banner' : 'footer';
+  track('pro_link_clicked', { placement: where });
+}, true);
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+function setMeta(f) {
+  const url = SITE + '?etf=' + encodeURIComponent(f.sym);
+  document.title = `${f.sym} Dividend Calculator: ${pct(f.yield)} Yield Income Projection | DividendProjection`;
+  document.querySelector('meta[name="description"]').content = `See how much monthly income ${f.sym} (${f.name}) could pay you at its live ${pct(f.yield)} yield, with ${(f.freq || 'regular').toLowerCase()} payouts, dividend reinvesting and taxes.`;
+  $('canonical').href = url;
+  document.querySelector('meta[property="og:url"]').content = url;
+  document.querySelector('meta[property="og:title"]').content = `${f.sym} dividend income calculator | DividendProjection`;
+}
+function boot(csv) {
+  state.funds = parseCSV(csv.trim()).slice(1).filter(c => c.length >= 12 && c[0]).map(buildFund).filter(f => f.yield !== null);
+  if (!state.funds.length) throw new Error('No funds');
+  const wanted = (params.get('etf') || '').trim().toUpperCase();
+  let fund = state.funds.find(f => f.sym === wanted);
+  if (!fund) {
+    if (wanted) { $('notice').textContent = `${wanted} isn't in the database yet, so you're seeing ${DEFAULT_TICKER}. Select the fund name in the sentence to pick another.`; $('notice').hidden = false; }
+    fund = state.funds.find(f => f.sym === DEFAULT_TICKER) || [...state.funds].sort((a, b) => b.aum - a.aum)[0];
+  }
+  state.fund = fund;
+  $('fundSym').textContent = fund.sym;
+  $('yield').value = params.has('yo') ? params.get('yo') : +fund.yield.toFixed(2);
+  setMeta(fund);
+  $('hero').classList.remove('loading');
+  sizeAll();
+  renderFund(); renderPopular(); render();
+}
+
+applyParams();
+placePill($('mode')); placePill($('acct'));
+sizeAll();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sizeAll(); fitBig(); placePill($('mode')); placePill($('acct')); drawDots(); });
+setTimeout(() => document.body.classList.remove('intro'), 2200);
+tickMeter();
+fetch(CSV_URL + '&t=' + Date.now())
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(boot)
+  .catch(err => {
+    console.error(err);
+    $('notice').innerHTML = `Live fund data didn't load. Check your connection and <a href="${esc(location.href)}">reload the page</a>.`;
+    $('notice').hidden = false;
+  });
+</script>
+</body>
+</html>
