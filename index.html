@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PTEX3Z2R9L"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-PTEX3Z2R9L');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="index, follow">
@@ -18,18 +27,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Google Analytics 4: paste your Measurement ID. Each fund switch is a full page load, so GA counts it as a page view. -->
-<script>
-  const GA_ID = 'G-XXXXXXXXXX';
-  if (!GA_ID.includes('XXXX')) {
-    const s = document.createElement('script');
-    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function(){ dataLayer.push(arguments); };
-    gtag('js', new Date()); gtag('config', GA_ID);
-  }
-</script>
 
 <style>
 /* =====================================================================
@@ -1903,8 +1900,8 @@ if ('IntersectionObserver' in window) {
 
 /* =====================================================================
    ANALYTICS EVENTS (GA4)
-   Engagement events, separate from page views. Until GA_ID is filled in at
-   the top of the file, track() does nothing, so this is safe to ship now.
+   Engagement events, separate from page views. Sent through the Google tag at
+   the top of the file (G-PTEX3Z2R9L). If that tag is removed, track() does nothing.
    Every event includes the current fund as "etf".
    ===================================================================== */
 const counts = { plan: 0 };
