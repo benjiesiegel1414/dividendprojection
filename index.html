@@ -152,7 +152,7 @@
      "name": "Why does the calculator assume the share price stays the same?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and many high-yield and option-income ETFs have lost share value over time, so treat every result as an illustration rather than a forecast."
+      "text": "Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and some higher-yield and option-income ETFs have seen their share prices and distributions decline over time, so treat every result as an illustration rather than a forecast."
      }
     },
     {
@@ -822,6 +822,70 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
   .hero-top { margin-bottom: 16px; }
 }
 
+
+/* =====================================================================
+   RISK NOTICE (high-yield / price-decay funds) + DISCLAIMERS
+   ===================================================================== */
+.risk { display: flex; gap: 12px; align-items: flex-start; margin-top: 18px; padding: 14px 16px; max-width: 640px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,184,77,.10), rgba(255,184,77,.05)); border: 1px solid rgba(255,196,110,.28);
+  animation: riskIn .5s var(--ease-out); }
+.risk[hidden] { display: none; }
+@keyframes riskIn { from { opacity: 0; transform: translateY(6px); } }
+.risk-ic { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: rgba(255,184,77,.16); color: #FFC56E; }
+.risk-ic svg { width: 16px; height: 16px; }
+.risk p { margin: 0; font-size: 14px; line-height: 1.5; color: #D9E6E0; }
+.risk p b { color: #FFD28A; font-weight: 600; }
+.risk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
+.risk-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid rgba(255,196,110,.4); background: rgba(255,196,110,.12); color: #FFE0A8; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, transform .15s var(--ease-spring); }
+.risk-btn:hover { background: rgba(255,196,110,.22); }
+.risk-btn:active { transform: scale(.97); }
+.risk-state { font-size: 13px; color: var(--night-muted); }
+.risk-state button { padding: 0; border: none; background: none; color: #FFE0A8; font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+.topnote { background: var(--night); color: #B9CCC5; font-size: 12.5px; line-height: 1.4; }
+.topnote .wrap { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 34px; padding-top: 7px; padding-bottom: 7px; text-align: center; }
+.topnote svg { flex: 0 0 auto; color: var(--glow); }
+.topnote a { color: #fff; font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.3); white-space: nowrap; }
+.topnote a:hover { border-color: #fff; }
+
+.legal-card { margin-top: 40px; padding: 22px 24px; display: grid; grid-template-columns: auto minmax(0,1fr); gap: 16px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow), var(--hi); }
+.legal-card .lc-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: #F0F3F1; color: var(--ink-2); }
+.legal-card h2 { margin: 2px 0 8px; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+.legal-card ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 28px; }
+.legal-card li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.legal-card li::before { content: ''; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--green-2); }
+.legal-card li b { color: var(--ink); font-weight: 600; }
+.legal-card .lc-link { display: inline-block; margin-top: 12px; font-size: 13.5px; font-weight: 600; color: var(--green); text-decoration: none; }
+.legal-card .lc-link:hover { text-decoration: underline; }
+@media (max-width: 760px) { .legal-card { grid-template-columns: minmax(0,1fr); gap: 10px; padding: 18px; } .legal-card ul { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 640px) { .topnote { font-size: 12px; } .topnote .wrap { justify-content: flex-start; text-align: left; } .risk { padding: 12px 14px; } }
+
+
+/* =====================================================================
+   HERO: SEARCH BAR + EDIT TIP (makes it obvious how to use the tool)
+   ===================================================================== */
+.hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 24px; opacity: 0; transform: translateY(6px); animation: hintIn .7s var(--ease-out) 1s forwards; }
+.hero-search { display: flex; align-items: center; gap: 12px; width: min(600px, 100%); height: 58px; padding: 0 16px 0 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line-2); box-shadow: 0 1px 2px rgba(11,31,26,.05), 0 10px 28px -16px rgba(11,31,26,.25); color: var(--ink-3); cursor: text; transition: border-color .2s, box-shadow .2s, transform .2s var(--ease-out); }
+.hero-search:hover { border-color: var(--green-2); box-shadow: 0 1px 2px rgba(11,31,26,.05), 0 14px 32px -16px rgba(11,122,85,.35); transform: translateY(-1px); }
+.hero-search:focus-within { border-color: var(--green-2); box-shadow: 0 0 0 4px rgba(21,163,116,.15); }
+.hero-search svg { color: var(--green); flex: 0 0 auto; }
+.hero-search input { flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: none; font-size: 17px; font-weight: 500; color: var(--ink); cursor: text; }
+.hero-search input::placeholder { color: var(--ink-3); }
+.hero-tip { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 14.5px; font-weight: 500; color: var(--ink-2); line-height: 1.45; }
+.hero-tip svg { flex: 0 0 auto; margin-top: 2px; color: var(--green); }
+.token::after { background: var(--green-2); opacity: .45; height: 2.5px; }
+.token:hover::after { opacity: 1; }
+.token { cursor: text; border-radius: .12em; transition: background .15s; }
+.token:hover { background: rgba(21,163,116,.07); }
+@media (max-width: 640px) {
+  .hero-actions { margin-top: 18px; gap: 10px; }
+  .hero-search { height: 54px; padding: 0 12px 0 14px; }
+  .hero-search input { font-size: 16px; }
+  .hero-search kbd { display: none; }
+  .hero-tip { font-size: 13.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-actions { opacity: 1; transform: none; animation: none; } }
+
 /* =====================================================================
    RESPONSIVE
    ===================================================================== */
@@ -876,6 +940,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 </head>
 <body class="intro">
 
+<div class="topnote" role="note"><div class="wrap"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg><span>For education only, not financial advice. Projections are hypothetical and assume a flat share price. <a href="/disclaimer">Read the disclaimer</a></span></div></div>
 <header class="site-header" id="siteHeader">
   <div class="wrap">
     <a class="brand" href="/" aria-label="DividendProjection home">
@@ -915,11 +980,14 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       <span class="w" style="--i:14" id="yrsWord">years.</span>
       <span id="mirror" aria-hidden="true"></span>
     </p>
-    <p class="try-hint" id="tryHint">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg>
-      <span><button type="button" id="tryHintBtn">Click the ticker</button> to try <span id="fundCount">150+ dividend ETFs</span></span>
-      <kbd>/</kbd>
-    </p>
+    <div class="hero-actions">
+      <label class="hero-search" for="heroSearch">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="heroSearch" type="text" autocomplete="off" spellcheck="false" placeholder="Search any dividend ETF, like SCHD, JEPI or QQQI" aria-label="Search for a dividend ETF">
+        <kbd>/</kbd>
+      </label>
+      <p class="hero-tip"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.8 2.7a1.6 1.6 0 0 1 2.3 2.3L5.6 12.5l-3 .7.7-3 7.5-7.5Z"/></svg><span><span class="tip-verb">Click</span> any underlined number in the sentence to change it. Your projection updates instantly below.</span></p>
+    </div>
 
     <!-- ============ RESULT STAGE ============ -->
     <section class="stage" aria-live="polite" aria-label="Your projected income">
@@ -931,6 +999,13 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
             <span class="per">/month</span>
           </div>
           <p class="answer-sub" id="answerSub">&nbsp;</p>
+          <div class="risk" id="risk" role="note" hidden>
+            <span class="risk-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.2 14.5 13.5h-13L8 2.2Z"/><path d="M8 6.6v3.2M8 11.6v.1"/></svg></span>
+            <div>
+              <p id="riskText">&nbsp;</p>
+              <div class="risk-actions" id="riskActions"></div>
+            </div>
+          </div>
           <div class="meter" id="meter">
             <i class="dot-live" aria-hidden="true"></i>
             <span>That's <b id="perDay">$0</b> a day. Since you opened this page: <span class="tick" id="tick">$0.0000</span></span>
@@ -1193,7 +1268,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
           </details>
           <details class="faq-item">
             <summary><h3>Why does the calculator assume the share price stays the same?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
-            <p>Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and many high-yield and option-income ETFs have lost share value over time, so treat every result as an illustration rather than a forecast.</p>
+            <p>Keeping the share price flat makes the math simple and transparent, so you can see exactly how deposits, yield and reinvestment add up. Real share prices rise and fall, and some higher-yield and option-income ETFs have seen their share prices and distributions decline over time, so treat every result as an illustration rather than a forecast.</p>
           </details>
           <details class="faq-item">
             <summary><h3>How are dividends taxed in the calculator?</h3><span class="faq-icon" aria-hidden="true"></span></summary>
@@ -1215,6 +1290,20 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
         <a class="btn-night primary" href="https://topdividendetfspro.com/" target="_blank" rel="noopener" style="text-decoration:none">Open PRO terminal</a>
       </section>
     </div>
+
+    <section class="legal-card" aria-labelledby="legalTitle">
+      <span class="lc-ic"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg></span>
+      <div>
+        <h2 id="legalTitle">Important information</h2>
+        <ul>
+          <li><b>Not financial advice.</b> DividendProjection is an educational tool. Nothing here is investment, tax or legal advice, or a recommendation to buy or sell any fund.</li>
+          <li><b>Hypothetical results.</b> Projections assume today's yield continues and the share price never changes. Real results will differ and can include losses.</li>
+          <li><b>A note on higher yields.</b> Distributions and NAV can decline over time, especially with ETFs yielding 20% or more, so projections for higher-yield ETFs may be less accurate.</li>
+          <li><b>Data can change.</b> Yields are updated daily but may contain errors or delays. Distributions are never guaranteed. Confirm details with the fund issuer.</li>
+        </ul>
+        <a class="lc-link" href="/disclaimer">Read the full disclaimer and assumptions</a>
+      </div>
+    </section>
 
     <footer>
       <div class="foot-top">
@@ -1575,6 +1664,7 @@ function render() {
   $('dotsTitle').textContent = `Every payout you'd receive over ${o.years} ${o.years === 1 ? 'year' : 'years'}`;
 
   renderPeers(o);
+  renderRisk(o);
   if (typeof renderCovers === 'function') { if (cover.pending) { cover.pending = false; autoPlayCovers(); } else renderCovers(); }
   chartTo(); dotsTo();
   // The bare homepage keeps a clean address until the visitor interacts
@@ -1695,8 +1785,9 @@ function drawChart() {
       <linearGradient id="barGh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0B7A55"/></linearGradient>
       <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#DDE3E0"/><line x1="0" y1="0" x2="0" y2="6" stroke="#CBD3CF" stroke-width="2"/></pattern>
     </defs>`;
-  const step = chart.step || niceStep(top);
-  for (let v = 0; v <= top + 1e-9; v += step) {
+  // Grid step follows the (animating) top of the chart, so the line count always stays small
+  const step = niceStep(top);
+  for (let v = 0, n = 0; v <= top + 1e-9 && n < 12; v += step, n++) {
     s += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v ? '#EDF0EE' : '#CFD7D3'}" ${v ? 'stroke-dasharray="2 4"' : ''}/>`;
     s += `<text x="${pad.l - 12}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${compact(v)}</text>`;
   }
@@ -1943,10 +2034,19 @@ function move(d) {
   $('q').setAttribute('aria-activedescendant', 'opt' + active);
   $('opt' + active)?.scrollIntoView({ block: 'nearest' });
 }
-function openPicker() { lastFocus = document.activeElement; $('palette').hidden = false; $('q').value = ''; paintList(); $('q').focus(); document.body.style.overflow = 'hidden'; }
-function closePicker() { $('palette').hidden = true; document.body.style.overflow = ''; lastFocus?.focus(); }
-$('fundBtn').addEventListener('click', openPicker);
-$('changeFund').addEventListener('click', openPicker);
+function openPicker(initial = '') { lastFocus = document.activeElement; $('palette').hidden = false; $('q').value = initial; paintList(); $('q').focus(); $('q').setSelectionRange(initial.length, initial.length); document.body.style.overflow = 'hidden'; }
+function closePicker() { $('palette').hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.id !== 'heroSearch') lastFocus.focus(); else $('heroSearch').blur(); }
+$('fundBtn').addEventListener('click', () => openPicker());
+// Big search bar under the sentence opens the fund picker, carrying over whatever was typed
+(() => {
+  const hs = $('heroSearch');
+  const open = (text = '') => { stopTickerDemo(); openPicker(text); hs.value = ''; track('fund_search_opened', { source: 'hero_search' }); };
+  hs.addEventListener('pointerdown', e => { e.preventDefault(); open(); });
+  hs.addEventListener('input', () => open(hs.value));
+  hs.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); open(hs.value); } });
+})();
+
+$('changeFund').addEventListener('click', () => openPicker());
 $('paletteBg').addEventListener('click', closePicker);
 $('q').addEventListener('input', paintList);
 $('q').addEventListener('keydown', e => {
@@ -2193,6 +2293,29 @@ if ('IntersectionObserver' in window) {
 } else cover.pending = true;
 
 /* =====================================================================
+   HIGH-YIELD / PRICE-DECAY NOTICE
+   Funds yielding 20%+ or flagged for price decay get a clear warning and a
+   one-tap way to see payouts falling 10% a year (default stays 0%).
+   ===================================================================== */
+const HIGH_YIELD = 20, DECLINE_PRESET = -10;
+function isHighRisk(f) { return !!f && (f.yield || 0) >= HIGH_YIELD; }   // general note for 20%+ yields
+function renderRisk(o) {
+  const f = state.fund, box = $('risk');
+  if (!isHighRisk(f)) { box.hidden = true; return; }
+  $('riskText').innerHTML = `<b>A note on higher yields.</b> Distributions and NAV can decline over time, especially with ETFs yielding ${HIGH_YIELD}% or more. This is a general note, not a comment on any specific fund, but it means projections for higher-yield ETFs may be less accurate.`;
+  $('riskActions').innerHTML = o.divGrowth < 0
+    ? `<span class="risk-state">Previewing payouts easing ${Math.abs(o.divGrowth)}% a year. <button type="button" data-risk="reset">Reset to 0%</button></span>`
+    : `<button type="button" class="risk-btn" data-risk="decline"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4l4.5 4.5 3-3L14 10M14 6v4h-4"/></svg>Preview payouts easing 10% a year</button>`;
+  box.hidden = false;
+}
+$('riskActions').addEventListener('click', e => {
+  const b = e.target.closest('[data-risk]'); if (!b) return;
+  $('divg').value = b.dataset.risk === 'decline' ? DECLINE_PRESET : 0;
+  render();
+  track('decay_preset_used', { action: b.dataset.risk });
+});
+
+/* =====================================================================
    HOMEPAGE TICKER DEMO
    On the bare homepage, the fund in the sentence flips through a few funds
    (recalculating each time) until the visitor interacts with anything.
@@ -2204,26 +2327,34 @@ const DEMO_STEPS = [
   { t: 'JEPQ', a: 25000 },
   { t: 'QQQI', a: 100000 },
   { t: 'VOO',  a: 15000 },
-  { t: 'CHPY', a: 5000 },
-  { t: 'BLOX', a: 75000 }
+  { t: 'CHPY', a: 5000, y: 3 },   // high-yield funds use short time frames
+  { t: 'BLOX', a: 25000, y: 3 }
 ];
 const demo = { running: false, timer: null, i: 0, list: [], pristine: !params.has('etf') };
-function markInteracted() {
+function markInteracted(e) {
+  if (e && e.target && e.target.closest && e.target.closest('.topnote a, .nav a, .eyebrow-live')) return;
   if (!demo.pristine && !demo.running) return;
   demo.pristine = false;
   stopTickerDemo();
   if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
 }
-['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, markInteracted, { once: true, capture: true }));
+// A real click, key press or typing ends the demo. Scrolling and touch-scrolling don't.
+['click', 'keydown', 'input'].forEach(ev => addEventListener(ev, markInteracted, { capture: true }));
 
 function swapFundInPlace(f) {
   state.fund = f;
   $('yield').value = +f.yield.toFixed(2);
   renderFund(); renderPopular(); render();
 }
-function flipTokenTo(f, amount) {
-  const btn = $('fundBtn'), sym = $('fundSym'), amt = $('start');
-  const setAmount = () => { if (amount != null) { amt.value = commas(amount); autosize(amt); } };
+function flipTokenTo(f, amount, years) {
+  const btn = $('fundBtn'), sym = $('fundSym'), amt = $('start'), yrs = $('years');
+  const targetYears = years || DEFAULTS.y;
+  const yearsChange = parseInt(yrs.value, 10) !== targetYears;
+  const setAmount = () => {
+    if (amount != null) { amt.value = commas(amount); autosize(amt); }
+    if (yearsChange) { yrs.value = targetYears; autosize(yrs); yrs.classList.remove('flip-out'); yrs.classList.add('flip-in'); }
+  };
+  if (yearsChange && !reduceMotion) { yrs.classList.remove('flip-in'); yrs.classList.add('flip-out'); }
   if (reduceMotion) { sym.textContent = f.sym; setAmount(); swapFundInPlace(f); return; }
   const w0 = btn.offsetWidth;
   const amountChanges = amount != null && moneyVal('start') !== amount;
@@ -2243,23 +2374,35 @@ function flipTokenTo(f, amount) {
 }
 function startTickerDemo() {
   if (params.has('etf') || reduceMotion) return;
-  demo.list = DEMO_STEPS.map(st => ({ f: state.funds.find(f => f.sym === st.t), a: st.a })).filter(x => x.f);
+  demo.list = DEMO_STEPS.map(st => ({ f: state.funds.find(f => f.sym === st.t), a: st.a, y: st.y })).filter(x => x.f);
   if (demo.list.length < 2) return;
   demo.i = Math.max(0, demo.list.findIndex(x => x.f === state.fund));
   demo.running = true;
+  demo.paused = false;
   $('fundBtn').classList.add('demo');
-  const next = () => {
-    if (!demo.running) return;
+  scheduleDemo();
+  // Pause while the sentence is off screen or the tab is hidden, and resume when it's back.
+  // Scrolling never ends the demo; only a click, a key press or typing does (see markInteracted).
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { demo.inView = es[0].isIntersecting; syncDemoPause(); }, { threshold: 0.35 }).observe(document.querySelector('.sentence'));
+  }
+  document.addEventListener('visibilitychange', syncDemoPause);
+}
+function scheduleDemo() {
+  clearTimeout(demo.timer);
+  demo.timer = setTimeout(function next() {
+    if (!demo.running || demo.paused) return;
     demo.i = (demo.i + 1) % demo.list.length;
-    flipTokenTo(demo.list[demo.i].f, demo.list[demo.i].a);
+    try { flipTokenTo(demo.list[demo.i].f, demo.list[demo.i].a, demo.list[demo.i].y); }
+    catch (err) { console.error(err); }          // one bad fund never stops the cycle
     demo.timer = setTimeout(next, 2500);
-  };
-  demo.timer = setTimeout(next, 2500);
-  // Any real interaction stops the demo and keeps whichever fund is showing
-  const stop = () => stopTickerDemo();
-  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, stop, { once: true, passive: true, capture: true }));
-  addEventListener('scroll', function onS() { if (scrollY > 120) { removeEventListener('scroll', onS); stop(); } }, { passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }, { once: true });
+  }, 2500);
+}
+function syncDemoPause() {
+  if (!demo.running) return;
+  const shouldPause = document.hidden || demo.inView === false;
+  if (shouldPause && !demo.paused) { demo.paused = true; clearTimeout(demo.timer); }
+  else if (!shouldPause && demo.paused) { demo.paused = false; scheduleDemo(); }
 }
 function stopTickerDemo() {
   if (!demo.running) return;
@@ -2268,7 +2411,6 @@ function stopTickerDemo() {
   $('fundBtn').classList.remove('demo');
   if (state.fund) history.replaceState(null, '', '/?' + stateParams(state.fund.sym, true).toString());
 }
-$('tryHintBtn').addEventListener('click', () => { stopTickerDemo(); openPicker(); track('fund_search_opened', { source: 'hint' }); });
 
 /* =====================================================================
    ANALYTICS EVENTS (GA4)
@@ -2362,8 +2504,7 @@ function boot(csv) {
   $('hero').classList.remove('loading');
   sizeAll();
   renderFund(); renderPopular(); render();
-  $('fundCount').textContent = '150+ dividend ETFs';
-  if (matchMedia('(hover: none)').matches) $('tryHintBtn').textContent = 'Tap the ticker';
+  if (matchMedia('(hover: none)').matches) document.querySelector('.tip-verb').textContent = 'Tap';
   startTickerDemo();
 }
 
