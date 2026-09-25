@@ -4,6 +4,8 @@
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTEX3Z2R9L"></script>
 <script>
+  // Visitors who send a Global Privacy Control signal are not tracked
+  if (navigator.globalPrivacyControl) window['ga-disable-G-PTEX3Z2R9L'] = true;
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -468,6 +470,10 @@ footer { padding: 48px 0 56px; color: var(--ink-3); font-size: 13px; }
 footer nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
 footer nav a { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: 14px; }
 footer nav a:hover { color: var(--ink); }
+.legal-nav { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0 0 16px; }
+.legal-nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 14px; }
+.legal-nav a:hover { color: var(--green); }
+footer p a { color: var(--ink-2); }
 footer p { max-width: 90ch; margin: 0 0 8px; line-height: 1.6; }
 
 /* =====================================================================
@@ -934,11 +940,13 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
           <a href="https://weeklyetfs.com/" target="_blank" rel="noopener">WeeklyETFs</a>
           <a href="https://monthlyetfs.com/" target="_blank" rel="noopener">MonthlyETFs</a>
           <a href="https://etftotalreturns.com/" target="_blank" rel="noopener">ETFTotalReturns</a>
-          <a href="mailto:Business@TopDividendETFs.com">Contact</a>
         </nav>
       </div>
+      <nav class="legal-nav" aria-label="Site information">
+        <a href="/about">About</a><a href="/disclaimer">Disclaimer</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a><a href="mailto:Business@TopDividendETFs.com">Contact</a>
+      </nav>
       <p>Projections are hypothetical and for educational purposes only. They are not financial, investment or tax advice. They assume today's yield and share price stay the same, which will not happen in real markets. Distributions can be cut and share prices can fall. Past performance does not predict future results. Speak with a qualified advisor before investing.</p>
-      <p>&copy; 2026 DividendProjection</p>
+      <p>&copy; 2026 Dividend Empire LLC. All rights reserved. See the full <a href="/disclaimer">disclaimer</a> for the assumptions behind every projection.</p>
     </footer>
   </div>
 </main>
