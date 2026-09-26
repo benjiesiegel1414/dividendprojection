@@ -356,6 +356,9 @@ function linkFor(p) {
   return SITE + '?' + q.toString();
 }
 function finalText(p) { return p.link ? p.text + '\n\n' + linkFor(p) : p.text; }
+// X's API allows only one $TICKER per post. Scheduled posts keep the first and write the rest plain.
+function oneCashtag(t) { let first = true; return t.replace(/\$([A-Za-z][A-Za-z.]{0,5})\b/g, (m, sym) => { if (first) { first = false; return m; } return sym; }); }
+const cashtagCount = t => (t.match(/\$[A-Za-z][A-Za-z.]{0,5}\b/g) || []).length;
 
 /* =====================================================================
    IMAGE (1200x675, same look as the site's share image)
@@ -610,7 +613,8 @@ function lintText(t) {
   if (t.split('\n').some(l => /\.\s*$/.test(l.trim()) && l.trim().length)) issues.push('a line ends with a period');
   if (/\b(grade|rated [A-F])\b/i.test(t)) issues.push('mentions a grade');
   if ([...t].length > 280) issues.push('over 280 characters');
-  return issues.length ? `<div class="err-text">Check: ${issues.join(', ')}</div>` : '';
+  const note = cashtagCount(t) > 1 ? `<div class="status-line">Scheduled: only the first $ticker keeps its $ (X limit). Post it myself keeps them all</div>` : '';
+  return (issues.length ? `<div class="err-text">Check: ${issues.join(', ')}</div>` : '') + note;
 }
 function updateCost() {
   const links = state.drafts.filter(p => p.link).length, plain = state.drafts.length - links;
@@ -658,7 +662,7 @@ $('drafts').addEventListener('input', e => {
   p.text = el.value; p.edited = true;
   const len = [...finalText(p)].length, ch = card.querySelector('.chars');
   ch.textContent = `${len}/280`; ch.classList.toggle('over', len > 280);
-  const old = card.querySelector('.err-text'); if (old) old.remove();
+  card.querySelectorAll('.side > .err-text, .side > .status-line').forEach(el => el.remove());
   const lint = lintText(finalText(p)); if (lint) card.querySelector('.side').insertAdjacentHTML('beforeend', lint);
 });
 
@@ -786,7 +790,7 @@ async function scheduleAll() {
     const files = [];
     for (const p of state.drafts) {
       const base = fileBase(p);
-      const record = { id: p.id, sym: p.sym, sym2: p.fund2 ? p.fund2.sym : undefined, kind: p.kind, params: p.params, yield: p.fund.yield, images: p.imgs.length, text: finalText(p), link: p.link, post_at: p.at.toISOString(), created_at: new Date().toISOString() };
+      const record = { id: p.id, sym: p.sym, sym2: p.fund2 ? p.fund2.sym : undefined, kind: p.kind, params: p.params, yield: p.fund.yield, images: p.imgs.length, text: oneCashtag(finalText(p)), link: p.link, post_at: p.at.toISOString(), created_at: new Date().toISOString() };
       files.push({ path: `queue/${base}.json`, b64: b64utf8(JSON.stringify(record, null, 2)) });
       p.imgs.forEach((src, i) => files.push({ path: `queue/${base}${i ? '-' + (i + 1) : ''}.png`, b64: src.split(',')[1] }));
     }
