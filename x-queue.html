@@ -264,16 +264,17 @@ const G_YEARS = [10, 15, 20, 25, 30];
 const ASKS = ['What would you put in? 👇', 'Would you hold it? 👇', 'How much do you own? 👇', 'Are you holding this one? 👇', ''];
 const HIGH_YIELD = 15, GROWTH_MAX_YIELD = 12;
 
-const PAIR_KINDS = ['versus', 'nowlater'];
+const PAIR_KINDS = ['versus', 'nowlater', 'paysneeds'];
 const isPair = k => PAIR_KINDS.includes(k);
 function paramsFor(kind) {
   if (kind === 'lump' || kind === 'versus') return { amt: pick(LUMP_AMOUNTS) };
   if (kind === 'nowlater') return { amt: pick(LUMP_AMOUNTS.filter(a => a >= 10000 && a <= 500000)), years: pick(G_YEARS) };
+  if (kind === 'paysneeds') return { amt: pick(LUMP_AMOUNTS.filter(a => a <= 250000)), goal: pick(GOALS) };
   if (kind === 'goal') return { goal: pick(GOALS) };
   return { start: pick(G_START), monthly: pick(G_MONTHLY), years: pick(G_YEARS) };
 }
 function histKey(p) {
-  const k = p.kind === 'lump' || p.kind === 'versus' ? p.params.amt : p.kind === 'goal' ? p.params.goal : p.kind === 'nowlater' ? `${p.params.amt}-${p.params.years}` : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
+  const k = p.kind === 'lump' || p.kind === 'versus' ? p.params.amt : p.kind === 'goal' ? p.params.goal : p.kind === 'nowlater' ? `${p.params.amt}-${p.params.years}` : p.kind === 'paysneeds' ? `${p.params.amt}-${p.params.goal}` : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
   const sym = p.kind === 'versus' ? [p.sym, p.fund2.sym].sort().join('+') : p.sym;
   return `${sym}_${p.kind}_${k}`;
 }
@@ -290,6 +291,12 @@ function compute(p) {
     const rows = project({ start: p.params.amt, monthly: 0, years: p.params.years, periods: f.periods, yield: y });
     const end = rows[rows.length - 1];
     p.calc = { annual, monthly: annual / 12, per: annual / f.periods, rows, later: end.monthlyInc, value: end.value };
+  } else if (p.kind === 'paysneeds') {
+    const annual = p.params.amt * y / 100, monthly = annual / 12;
+    // Goal between 1.5x and 20x what the amount pays, so the two cards feel related
+    const bigger = GOALS.filter(g => g >= monthly * 1.5), near = bigger.filter(g => g <= monthly * 20);
+    if (!near.includes(p.params.goal)) p.params.goal = near.length ? pick(near) : bigger.length ? bigger[0] : GOALS[GOALS.length - 1];
+    p.calc = { annual, monthly, per: annual / f.periods, need: roundTo(p.params.goal * 12 / (y / 100), 100) };
   } else if (p.kind === 'goal') {
     p.calc = { need: roundTo(p.params.goal * 12 / (y / 100), 100) };
   } else {
@@ -299,50 +306,49 @@ function compute(p) {
   }
 }
 function writeText(p) {
+  // One fund per post. The post opens with its $ticker, and the rest is words and numbers only.
   const f = p.fund, s = '$' + f.sym, y = pct(f.yield), c = p.calc, hy = f.yield >= HIGH_YIELD;
   const caveat = hy ? '\n\nAssumes the yield holds, which is never guaranteed' : '';
   const ask = pick(ASKS), end = ask ? '\n\n' + ask : '';
   let t;
-  if (p.kind === 'versus') {
-    const f2 = p.fund2, s2 = '$' + f2.sym, amt = usd0.format(p.params.amt), a = p.calc.a, b = p.calc.b;
-    const hy2 = Math.max(f.yield, f2.yield) >= HIGH_YIELD;
-    t = pick([
-      () => `${amt} in ${s} vs ${s2} 👇\n\n${s} pays about ${money(a.monthly)}/month\n${s2} pays about ${money(b.monthly)}/month`,
-      () => `Same ${amt}, two different dividend ETFs\n\n${s} at ${y} yield: ${money(a.monthly)}/month\n${s2} at ${pct(f2.yield)} yield: ${money(b.monthly)}/month`,
-    ])() + (hy2 ? '\n\nHigh yields can change, so size positions carefully' : '') + '\n\n' + pick(['Which would you rather own? 👇', 'Which one are you buying? 👇', 'Pick one 👇']);
-    return t;
-  }
-  if (p.kind === 'nowlater') {
-    const amt = usd0.format(p.params.amt), yrs = p.params.years;
-    t = pick([
-      () => `${amt} in ${s} pays about ${money(c.monthly)}/month today\n\nReinvest every dividend for ${yrs} years and it could pay ${money(c.later)}/month`,
-      () => `${s} today vs ${s} in ${yrs} years 👇\n\n${amt} pays about ${money(c.monthly)}/month now\nWith dividends reinvested: about ${money(c.later)}/month in year ${yrs}`,
-    ])() + `\n\nAssumes today's ${y} yield holds and no price change` + end;
-    return t;
-  }
   if (p.kind === 'lump') {
     const amt = usd0.format(p.params.amt);
     const perLine = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 4 ? `\n\nPaid quarterly, about ${money(c.per)} each payout` : '';
     t = pick([
-      () => `${amt} in ${s} pays you about ${money(c.monthly)}/month in dividends\n\nThat's ${money(c.annual)} a year at today's ${y} yield${perLine}`,
-      () => `What ${amt} in ${s} pays you 👇\n\n${money(c.monthly)} every month\n${money(c.annual)} every year\n\nBased on its ${y} yield today`,
-      () => `If you put ${amt} into ${s} today\n\nYou'd collect about ${money(c.annual)} in dividends over the next 12 months\n\nThat's ${money(c.monthly)} a month without selling a share`,
+      () => `${s} pays about ${money(c.monthly)}/month on a ${amt} investment\n\nThat's ${money(c.annual)} a year at today's ${y} yield${perLine}`,
+      () => `${s} 👇\n\n${amt} invested pays you\n${money(c.monthly)} every month\n${money(c.annual)} every year\n\nBased on its ${y} yield today`,
+      () => `${s}: put ${amt} in today and you'd collect about ${money(c.annual)} in dividends over the next 12 months\n\nThat's ${money(c.monthly)} a month without selling a share`,
     ])();
   } else if (p.kind === 'goal') {
     const g = usd0.format(p.params.goal);
     t = pick([
-      () => `Want ${g}/month in dividends from ${s}?\n\nYou'd need about ${usd0.format(c.need)} invested at its ${y} yield`,
-      () => `How much ${s} do you need to make ${g} a month?\n\nAbout ${usd0.format(c.need)}\n\nThat's at today's ${y} yield`,
-      () => `${g}/month in dividends\n\nWith ${s} that takes roughly ${usd0.format(c.need)}\n\nBased on its ${y} yield today`,
+      () => `${s} 👇\n\nWant ${g}/month in dividends?\nYou'd need about ${usd0.format(c.need)} invested at its ${y} yield`,
+      () => `${s}: how much do you need to make ${g} a month?\n\nAbout ${usd0.format(c.need)}\n\nThat's at today's ${y} yield`,
+      () => `${s} at ${y} yield\n\n${g}/month in dividends takes roughly ${usd0.format(c.need)} invested`,
     ])();
+  } else if (p.kind === 'paysneeds') {
+    const amt = usd0.format(p.params.amt), g = usd0.format(p.params.goal);
+    t = pick([
+      () => `${s} 👇\n\n${amt} pays about ${money(c.monthly)}/month\n${g}/month takes about ${usd0.format(c.need)}\n\nBased on its ${y} yield today`,
+      () => `${s} at ${y} yield\n\nWhat ${amt} pays: about ${money(c.monthly)}/month\nWhat ${g}/month takes: about ${usd0.format(c.need)}`,
+      () => `${s}: two ways to look at it\n\n${amt} invested pays about ${money(c.monthly)} a month\nReplacing ${g} a month takes about ${usd0.format(c.need)}`,
+    ])();
+  } else if (p.kind === 'nowlater') {
+    const amt = usd0.format(p.params.amt), yrs = p.params.years;
+    t = pick([
+      () => `${s} today vs ${yrs} years from now 👇\n\n${amt} pays about ${money(c.monthly)}/month now\nWith dividends reinvested: about ${money(c.later)}/month in year ${yrs}`,
+      () => `${s} 👇\n\n${amt} pays about ${money(c.monthly)}/month today\nReinvest every dividend for ${yrs} years and it could pay ${money(c.later)}/month`,
+      () => `${s}: what ${amt} pays you\n\nToday: about ${money(c.monthly)}/month\nIn ${yrs} years, reinvesting every dividend: about ${money(c.later)}/month`,
+    ])();
+    return t + `\n\nAssumes today's ${y} yield holds and no price change` + end;
   } else {
     const { start, monthly, years } = p.params;
-    const open = start ? `${usd0.format(start)} today + ${usd0.format(monthly)}/month into ${s} for ${years} years` : `Just ${usd0.format(monthly)}/month into ${s} for ${years} years`;
+    const plan = start ? `${usd0.format(start)} today + ${usd0.format(monthly)}/month for ${years} years` : `${usd0.format(monthly)}/month for ${years} years`;
     t = pick([
-      () => `${open}\n\nWith dividends reinvested, it could pay about ${money(c.monthly)}/month by year ${years}`,
-      () => `${open}\n\nReinvest every dividend and by year ${years} it could be paying you ${money(c.monthly)} a month`,
-    ])() + `\n\nAssumes today's ${y} yield holds and no price change`;
-    return t + end;
+      () => `${s} 👇\n\n${plan}\n\nWith dividends reinvested, it could pay about ${money(c.monthly)}/month by year ${years}`,
+      () => `${s}: ${start ? `start with ${usd0.format(start)}, ` : ''}add ${usd0.format(monthly)} every month and reinvest every dividend\n\nIn ${years} years that's about ${money(c.monthly)}/month in income`,
+    ])();
+    return t + `\n\nAssumes today's ${y} yield holds and no price change` + end;
   }
   return t + caveat + end;
 }
@@ -350,6 +356,7 @@ function linkFor(p) {
   const q = new URLSearchParams({ etf: p.fund.sym });
   if (p.kind === 'lump' || p.kind === 'versus') { q.set('a', p.params.amt); q.set('m', 0); }
   if (p.kind === 'nowlater') { q.set('a', p.params.amt); q.set('m', 0); q.set('y', p.params.years); }
+  if (p.kind === 'paysneeds') { q.set('a', p.params.amt); q.set('m', 0); }
   if (p.kind === 'goal') q.set('goal', p.params.goal);
   if (p.kind === 'growth') { q.set('a', p.params.start); q.set('m', p.params.monthly); q.set('y', p.params.years); }
   q.set('utm_source', 'x'); q.set('utm_medium', 'social'); q.set('utm_campaign', 'queue');
@@ -486,6 +493,15 @@ function drawImages(p) {
       bars: payoutBars(fund, r.per), barsNote: `${fund.periods} payouts a year`,
     }));
   }
+  if (p.kind === 'paysneeds') {
+    const f = p.fund, P = f.periods, shared = Math.max(c.per, p.params.goal * 12 / P);
+    return [
+      drawCard({ barsMax: shared, pill: 'What it pays', line1: `${usd0.format(p.params.amt)} in ${f.sym}`, line2: 'could pay me', big: money(c.monthly), unit: 'per month',
+        facts: [`${pct(f.yield)} yield, paid ${payWord(P)}`, `${money(c.annual)} a year`], bars: payoutBars(f, c.per), barsNote: `${P} payouts a year` }),
+      drawCard({ barsMax: shared, pill: 'What it takes', line1: `To earn ${usd0.format(p.params.goal)}/month from ${f.sym}`, line2: "I'd need", big: usd0.format(c.need), unit: 'invested',
+        facts: [`${pct(f.yield)} yield, paid ${payWord(P)}`, `${usd0.format(p.params.goal * 12)} a year`], bars: payoutBars(f, p.params.goal * 12 / P), barsNote: `${P} payouts a year` }),
+    ];
+  }
   if (p.kind === 'nowlater') {
     const f = p.fund, yrs = p.params.years;
     return [
@@ -510,13 +526,18 @@ function pool() {
 }
 function pickKind(fund) {
   const r = Math.random();
-  const k = r < .35 ? 'lump' : r < .55 ? 'goal' : r < .7 ? 'growth' : r < .9 ? 'versus' : 'nowlater';
+  const k = r < .35 ? 'lump' : r < .55 ? 'goal' : r < .7 ? 'growth' : r < .85 ? 'paysneeds' : 'nowlater';
   return (k === 'growth' || k === 'nowlater') && fund.yield > GROWTH_MAX_YIELD ? 'lump' : k;
 }
 function makePost(fund, kind, used) {
   for (let i = 0; i < 25; i++) {
     const p = { id: crypto.randomUUID().slice(0, 8), fund, sym: fund.sym, kind, params: paramsFor(kind), link: false, edited: false };
-    if (kind === 'versus') { p.fund2 = chooseFund(new Set([fund.sym, ...state.drafts.map(d => d.sym)])); if (!p.fund2) return null; p.params.sym2 = p.fund2.sym; }
+    if (kind === 'versus') {
+      p.fund2 = chooseFund(new Set([fund.sym, ...state.drafts.map(d => d.sym)])); if (!p.fund2) return null;
+      // The bigger fund (by AUM) gets the one $cashtag and the first card, since more people search for it
+      if (p.fund2.aum > p.fund.aum) { [p.fund, p.fund2] = [p.fund2, p.fund]; p.sym = p.fund.sym; }
+      p.params.sym2 = p.fund2.sym;
+    }
     if (!state.history.has(histKey(p)) && !used.has(histKey(p))) { compute(p); p.text = writeText(p); p.imgs = drawImages(p); return p; }
   }
   return null;
@@ -564,7 +585,8 @@ async function generate() {
 const pad = v => String(v).padStart(2, '0');
 const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const fmtWhen = d => d.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-const KIND_LABEL = { lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', versus: 'Head to head (2 images)', nowlater: 'Today vs later (2 images)' };
+const KIND_LABEL = { lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', paysneeds: 'Pays vs needs (2 images)', nowlater: 'Today vs later (2 images)' };
+const OLD_KIND_LABEL = { versus: 'Head to head (2 images)' };
 
 function renderDrafts() {
   const box = $('drafts');
@@ -613,7 +635,7 @@ function lintText(t) {
   if (t.split('\n').some(l => /\.\s*$/.test(l.trim()) && l.trim().length)) issues.push('a line ends with a period');
   if (/\b(grade|rated [A-F])\b/i.test(t)) issues.push('mentions a grade');
   if ([...t].length > 280) issues.push('over 280 characters');
-  const note = cashtagCount(t) > 1 ? `<div class="status-line">Scheduled: only the first $ticker keeps its $ (X limit). Post it myself keeps them all</div>` : '';
+  const note = cashtagCount(t) > 1 ? `<div class="status-line">This has more than one $ticker. X only allows one on scheduled posts, so the extras will post without the $</div>` : '';
   return (issues.length ? `<div class="err-text">Check: ${issues.join(', ')}</div>` : '') + note;
 }
 function updateCost() {
@@ -738,19 +760,26 @@ async function commitFiles(files, message) {
   // files: [{ path, b64 }] to add or [{ path, del: true }] to remove, all in one commit
   const entries = [];
   for (const f of files) {
-    if (f.del) { entries.push({ path: f.path, mode: '100644', type: 'blob', sha: null }); continue; }
+    if (f.del) {
+      // Skip files that are already gone (posted, failed or removed), or GitHub rejects the save
+      const exists = await gh(`/contents/${f.path}?ref=${cfg.branch}`, { allow404: true });
+      if (exists) entries.push({ path: f.path, mode: '100644', type: 'blob', sha: null });
+      continue;
+    }
     const blob = await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: f.b64, encoding: 'base64' }) });
     entries.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
   }
+  if (!entries.length) return; // nothing left to change
+  let lastErr;
   for (let attempt = 0; attempt < 4; attempt++) {
     const ref = await gh(`/git/ref/heads/${cfg.branch}`);
     const head = await gh(`/git/commits/${ref.object.sha}`);
     const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: entries }) });
     const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
     try { await gh(`/git/refs/heads/${cfg.branch}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) }); return; }
-    catch (e) { if (e.status !== 422) throw e; await new Promise(r => setTimeout(r, 1500)); }
+    catch (e) { if (e.status !== 422) throw e; lastErr = e; await new Promise(r => setTimeout(r, 2000)); }
   }
-  throw new Error('GitHub kept changing while saving. Try again in a minute');
+  throw new Error(`Couldn't save to GitHub (${lastErr ? lastErr.message : 'unknown error'}). Click Refresh and try again`);
 }
 async function listDir(dir) {
   const items = await gh(`/contents/${dir}?ref=${cfg.branch}`, { allow404: true });
@@ -819,7 +848,7 @@ async function renderList(dir, box, opts = {}) {
     box.innerHTML = recs.map(({ f, r }) => `<article class="post" data-path="${esc(f.path)}">
       ${opts.images ? `<div class="pics${(r.images || 1) > 1 ? ' pair' : ''}">${Array.from({ length: r.images || 1 }, (_, i) => `<img alt="Image ${i + 1} for ${esc(r.sym)} post" data-img="${esc(f.path.replace(/\.json$/, i ? '-' + (i + 1) + '.png' : '.png'))}">`).join('')}</div>` : ''}
       <div class="side">
-        <div class="meta"><span class="tag">$${esc(r.sym)}${r.sym2 ? ' vs $' + esc(r.sym2) : ''}</span><span>${esc(KIND_LABEL[r.kind] || r.kind)}</span></div>
+        <div class="meta"><span class="tag">$${esc(r.sym)}${r.sym2 ? ' vs $' + esc(r.sym2) : ''}</span><span>${esc(KIND_LABEL[r.kind] || OLD_KIND_LABEL[r.kind] || r.kind)}</span></div>
         <div class="status-line">${opts.line(r)}</div>
         <textarea readonly>${esc(r.text)}</textarea>
         ${r.error ? `<div class="err-text">${esc(r.error)}</div>` : ''}
@@ -850,9 +879,11 @@ $('scheduled').addEventListener('click', async e => {
   try {
     if (btn.dataset.act === 'unschedule') {
       await commitFiles([{ path, del: true }, ...pngs.map(x => ({ path: x, del: true }))], 'Unschedule post');
-      toast('Unscheduled');
+      toast('Unscheduled. If it had already posted or failed, check those tabs');
     } else {
-      const r = await readJSON(path); r.post_at = new Date().toISOString();
+      let r;
+      try { r = await readJSON(path); } catch (e) { toast('That post is no longer in the queue. It may have posted or failed already'); showScheduled(); return; }
+      r.post_at = new Date().toISOString();
       await commitFiles([{ path, b64: b64utf8(JSON.stringify(r, null, 2)) }], 'Post now');
       try {
         await gh('/actions/workflows/post.yml/dispatches', { method: 'POST', body: JSON.stringify({ ref: cfg.branch }) });
