@@ -50,6 +50,8 @@ nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: 
 
 .post { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .post img { width: 100%; display: block; border-radius: 10px; aspect-ratio: 16 / 9; background: var(--ink); }
+.pics.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pics.pair img { aspect-ratio: 7 / 8; object-fit: cover; }
 .post .side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .post .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
 .post .meta input[type=time] { border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
@@ -262,20 +264,32 @@ const G_YEARS = [10, 15, 20, 25, 30];
 const ASKS = ['What would you put in? 👇', 'Would you hold it? 👇', 'How much do you own? 👇', 'Are you holding this one? 👇', ''];
 const HIGH_YIELD = 15, GROWTH_MAX_YIELD = 12;
 
+const PAIR_KINDS = ['versus', 'nowlater'];
+const isPair = k => PAIR_KINDS.includes(k);
 function paramsFor(kind) {
-  if (kind === 'lump') return { amt: pick(LUMP_AMOUNTS) };
+  if (kind === 'lump' || kind === 'versus') return { amt: pick(LUMP_AMOUNTS) };
+  if (kind === 'nowlater') return { amt: pick(LUMP_AMOUNTS.filter(a => a >= 10000 && a <= 500000)), years: pick(G_YEARS) };
   if (kind === 'goal') return { goal: pick(GOALS) };
   return { start: pick(G_START), monthly: pick(G_MONTHLY), years: pick(G_YEARS) };
 }
 function histKey(p) {
-  const k = p.kind === 'lump' ? p.params.amt : p.kind === 'goal' ? p.params.goal : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
-  return `${p.sym}_${p.kind}_${k}`;
+  const k = p.kind === 'lump' || p.kind === 'versus' ? p.params.amt : p.kind === 'goal' ? p.params.goal : p.kind === 'nowlater' ? `${p.params.amt}-${p.params.years}` : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
+  const sym = p.kind === 'versus' ? [p.sym, p.fund2.sym].sort().join('+') : p.sym;
+  return `${sym}_${p.kind}_${k}`;
 }
 function compute(p) {
   const f = p.fund, y = f.yield;
   if (p.kind === 'lump') {
     const annual = p.params.amt * y / 100;
     p.calc = { annual, monthly: annual / 12, per: annual / f.periods };
+  } else if (p.kind === 'versus') {
+    const pay = fund => { const annual = p.params.amt * fund.yield / 100; return { annual, monthly: annual / 12, per: annual / fund.periods }; };
+    p.calc = { a: pay(f), b: pay(p.fund2) };
+  } else if (p.kind === 'nowlater') {
+    const annual = p.params.amt * y / 100;
+    const rows = project({ start: p.params.amt, monthly: 0, years: p.params.years, periods: f.periods, yield: y });
+    const end = rows[rows.length - 1];
+    p.calc = { annual, monthly: annual / 12, per: annual / f.periods, rows, later: end.monthlyInc, value: end.value };
   } else if (p.kind === 'goal') {
     p.calc = { need: roundTo(p.params.goal * 12 / (y / 100), 100) };
   } else {
@@ -289,6 +303,23 @@ function writeText(p) {
   const caveat = hy ? '\n\nAssumes the yield holds, which is never guaranteed' : '';
   const ask = pick(ASKS), end = ask ? '\n\n' + ask : '';
   let t;
+  if (p.kind === 'versus') {
+    const f2 = p.fund2, s2 = '$' + f2.sym, amt = usd0.format(p.params.amt), a = p.calc.a, b = p.calc.b;
+    const hy2 = Math.max(f.yield, f2.yield) >= HIGH_YIELD;
+    t = pick([
+      () => `${amt} in ${s} vs ${s2} 👇\n\n${s} pays about ${money(a.monthly)}/month\n${s2} pays about ${money(b.monthly)}/month`,
+      () => `Same ${amt}, two different dividend ETFs\n\n${s} at ${y} yield: ${money(a.monthly)}/month\n${s2} at ${pct(f2.yield)} yield: ${money(b.monthly)}/month`,
+    ])() + (hy2 ? '\n\nHigh yields can change, so size positions carefully' : '') + '\n\n' + pick(['Which would you rather own? 👇', 'Which one are you buying? 👇', 'Pick one 👇']);
+    return t;
+  }
+  if (p.kind === 'nowlater') {
+    const amt = usd0.format(p.params.amt), yrs = p.params.years;
+    t = pick([
+      () => `${amt} in ${s} pays about ${money(c.monthly)}/month today\n\nReinvest every dividend for ${yrs} years and it could pay ${money(c.later)}/month`,
+      () => `${s} today vs ${s} in ${yrs} years 👇\n\n${amt} pays about ${money(c.monthly)}/month now\nWith dividends reinvested: about ${money(c.later)}/month in year ${yrs}`,
+    ])() + `\n\nAssumes today's ${y} yield holds and no price change` + end;
+    return t;
+  }
   if (p.kind === 'lump') {
     const amt = usd0.format(p.params.amt);
     const perLine = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 4 ? `\n\nPaid quarterly, about ${money(c.per)} each payout` : '';
@@ -317,7 +348,8 @@ function writeText(p) {
 }
 function linkFor(p) {
   const q = new URLSearchParams({ etf: p.fund.sym });
-  if (p.kind === 'lump') { q.set('a', p.params.amt); q.set('m', 0); }
+  if (p.kind === 'lump' || p.kind === 'versus') { q.set('a', p.params.amt); q.set('m', 0); }
+  if (p.kind === 'nowlater') { q.set('a', p.params.amt); q.set('m', 0); q.set('y', p.params.years); }
   if (p.kind === 'goal') q.set('goal', p.params.goal);
   if (p.kind === 'growth') { q.set('a', p.params.start); q.set('m', p.params.monthly); q.set('y', p.params.years); }
   q.set('utm_source', 'x'); q.set('utm_medium', 'social'); q.set('utm_campaign', 'queue');
@@ -398,6 +430,72 @@ function drawImage(p) {
 }
 
 /* =====================================================================
+   TALL CARDS FOR 2-IMAGE POSTS (X shows each at about 7:8 side by side)
+   ===================================================================== */
+function drawCard(o) {
+  const W = 700, H = 800, S = 2, cv = document.createElement('canvas');
+  cv.width = W * S; cv.height = H * S;
+  const ctx = cv.getContext('2d'); ctx.scale(S, S);
+  const F = (w, s) => `${w} ${s}px Geist, system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = '#0B1F1A'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 620); g.addColorStop(0, 'rgba(91,227,180,.20)'); g.addColorStop(1, 'rgba(91,227,180,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#EAF3EF'; ctx.font = F(600, 22); ctx.fillText('DividendProjection', 48, 68);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 16); ctx.fillText('dividendprojection.com', W - 48, 68);
+  // pill
+  ctx.textAlign = 'left'; ctx.font = F(600, 18);
+  const pw = ctx.measureText(o.pill).width + 28;
+  ctx.fillStyle = 'rgba(91,227,180,.14)'; roundRect(ctx, 48, 104, pw, 36, 18); ctx.fill();
+  ctx.fillStyle = '#5BE3B4'; ctx.fillText(o.pill, 62, 128);
+  // sentence
+  ctx.fillStyle = '#93ADA4'; let s1 = 30; ctx.font = F(500, s1);
+  while (ctx.measureText(o.line1).width > W - 96 && s1 > 18) { s1 -= 1; ctx.font = F(500, s1); }
+  ctx.fillText(o.line1, 48, 200);
+  ctx.font = F(500, 30); ctx.fillText(o.line2, 48, 242);
+  // big number + unit
+  let size = 136; ctx.font = F(600, size);
+  while (ctx.measureText(o.big).width > W - 96 && size > 56) { size -= 4; ctx.font = F(600, size); }
+  const baseY = 250 + size * 0.95;
+  ctx.fillStyle = '#FFFFFF'; ctx.fillText(o.big, 42, baseY);
+  ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 28); ctx.fillText(o.unit, 48, baseY + 46);
+  // facts
+  ctx.font = F(500, 20); ctx.fillText(o.facts[0], 48, baseY + 104); ctx.fillText(o.facts[1], 48, baseY + 134);
+  // bars
+  const by = H - 56, top = baseY + 170, bh = Math.max(60, by - top), bars = o.bars, n = bars.length;
+  const slot = (W - 96) / n, bw = Math.max(3, Math.min(34, slot * .64)), max = o.barsMax || Math.max(...bars, 1);
+  bars.forEach((v, i) => {
+    const h = Math.max(3, v / max * bh), x = 48 + i * slot + (slot - bw) / 2;
+    const gg = ctx.createLinearGradient(0, by - h, 0, by); gg.addColorStop(0, '#5BE3B4'); gg.addColorStop(1, '#0E8A60');
+    ctx.fillStyle = gg; roundRect(ctx, x, by - h, bw, h, Math.min(6, bw / 2.4, h / 2)); ctx.fill();
+  });
+  if (o.barsNote) { ctx.textAlign = 'right'; ctx.fillStyle = '#5E7C72'; ctx.font = F(500, 15); ctx.fillText(o.barsNote, W - 48, H - 26); }
+  return cv.toDataURL('image/png');
+}
+function payoutBars(fund, perAmount) { return new Array(fund.periods).fill(perAmount); }
+function drawImages(p) {
+  const c = p.calc;
+  if (p.kind === 'versus') {
+    const shared = Math.max(c.a.per, c.b.per);
+    return [[p.fund, c.a], [p.fund2, c.b]].map(([fund, r]) => drawCard({ barsMax: shared,
+      pill: `$${fund.sym}`, line1: `${usd0.format(p.params.amt)} in ${fund.sym}`, line2: 'could pay me',
+      big: money(r.monthly), unit: 'per month',
+      facts: [`${pct(fund.yield)} yield, paid ${payWord(fund.periods)}`, `${money(r.annual)} a year`],
+      bars: payoutBars(fund, r.per), barsNote: `${fund.periods} payouts a year`,
+    }));
+  }
+  if (p.kind === 'nowlater') {
+    const f = p.fund, yrs = p.params.years;
+    return [
+      drawCard({ pill: 'Today', line1: `${usd0.format(p.params.amt)} in ${f.sym}`, line2: 'pays me', big: money(c.monthly), unit: 'per month',
+        facts: [`${pct(f.yield)} yield, paid ${payWord(f.periods)}`, `${money(c.annual)} a year`], bars: payoutBars(f, c.per), barsNote: 'Payouts this year' }),
+      drawCard({ pill: `In ${yrs} years`, line1: `Reinvest every ${f.sym} dividend`, line2: `and in year ${yrs} it could pay`, big: money(c.later), unit: 'per month',
+        facts: [`${usd0.format(c.value)} balance, nothing added`, `Assumes ${pct(f.yield)} yield holds`], bars: c.rows.slice(1).map(r => r.monthlyInc), barsNote: 'Monthly income by year' }),
+    ];
+  }
+  return [drawImage(p)];
+}
+
+/* =====================================================================
    GENERATE
    ===================================================================== */
 function pool() {
@@ -409,13 +507,14 @@ function pool() {
 }
 function pickKind(fund) {
   const r = Math.random();
-  const k = r < .5 ? 'lump' : r < .75 ? 'goal' : 'growth';
-  return k === 'growth' && fund.yield > GROWTH_MAX_YIELD ? 'lump' : k;
+  const k = r < .35 ? 'lump' : r < .55 ? 'goal' : r < .7 ? 'growth' : r < .9 ? 'versus' : 'nowlater';
+  return (k === 'growth' || k === 'nowlater') && fund.yield > GROWTH_MAX_YIELD ? 'lump' : k;
 }
 function makePost(fund, kind, used) {
   for (let i = 0; i < 25; i++) {
     const p = { id: crypto.randomUUID().slice(0, 8), fund, sym: fund.sym, kind, params: paramsFor(kind), link: false, edited: false };
-    if (!state.history.has(histKey(p)) && !used.has(histKey(p))) { compute(p); p.text = writeText(p); p.img = drawImage(p); return p; }
+    if (kind === 'versus') { p.fund2 = chooseFund(new Set([fund.sym, ...state.drafts.map(d => d.sym)])); if (!p.fund2) return null; p.params.sym2 = p.fund2.sym; }
+    if (!state.history.has(histKey(p)) && !used.has(histKey(p))) { compute(p); p.text = writeText(p); p.imgs = drawImages(p); return p; }
   }
   return null;
 }
@@ -450,7 +549,7 @@ async function generate() {
   for (let i = 0; i < n; i++) {
     const fund = chooseFund(usedSyms); if (!fund) break;
     const p = makePost(fund, pickKind(fund), usedKeys); if (!p) { i--; usedSyms.add(fund.sym); continue; }
-    p.at = times[i]; usedSyms.add(fund.sym); usedKeys.add(histKey(p)); out.push(p);
+    p.at = times[i]; usedSyms.add(fund.sym); if (p.fund2) usedSyms.add(p.fund2.sym); usedKeys.add(histKey(p)); out.push(p);
   }
   state.drafts = out;
   renderDrafts();
@@ -462,7 +561,7 @@ async function generate() {
 const pad = v => String(v).padStart(2, '0');
 const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const fmtWhen = d => d.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-const KIND_LABEL = { lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time' };
+const KIND_LABEL = { lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', versus: 'Head to head (2 images)', nowlater: 'Today vs later (2 images)' };
 
 function renderDrafts() {
   const box = $('drafts');
@@ -477,18 +576,22 @@ function renderDrafts() {
   box.innerHTML = state.drafts.map(p => {
     const len = [...finalText(p)].length, hy = p.fund.yield >= HIGH_YIELD;
     return `<article class="post" data-id="${p.id}">
-      <img src="${p.img}" alt="Image for ${esc(p.sym)} post">
+      <div class="pics${p.imgs.length > 1 ? ' pair' : ''}">${p.imgs.map((src, i) => `<img src="${src}" alt="Image ${i + 1} for ${esc(p.sym)} post">`).join('')}</div>
       <div class="side">
         <div class="meta">
           <input type="time" value="${hhmm(p.at)}" data-act="time" aria-label="Post time">
           <span>${p.at.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</span>
           <span class="tag${hy ? ' hy' : ''}">$${esc(p.sym)} ${pct(p.fund.yield)}</span>
+          ${p.fund2 ? `<span class="tag${p.fund2.yield >= HIGH_YIELD ? ' hy' : ''}">$${esc(p.fund2.sym)} ${pct(p.fund2.yield)}</span>` : ''}
           ${p.sent ? '<span class="tag">Sent to X</span>' : ''}
-          <select data-act="kind" aria-label="Post type">${Object.entries(KIND_LABEL).map(([k, v]) => `<option value="${k}"${k === p.kind ? ' selected' : ''}${k === 'growth' && p.fund.yield > GROWTH_MAX_YIELD ? ' disabled' : ''}>${v}</option>`).join('')}</select>
+          <select data-act="kind" aria-label="Post type">${Object.entries(KIND_LABEL).map(([k, v]) => `<option value="${k}"${k === p.kind ? ' selected' : ''}${(k === 'growth' || k === 'nowlater') && p.fund.yield > GROWTH_MAX_YIELD ? ' disabled' : ''}>${v}</option>`).join('')}</select>
         </div>
         <textarea data-act="text" aria-label="Post text">${esc(p.text)}</textarea>
         <div class="row">
           <button class="btn small primary" data-act="manual">${p.sent ? 'Post it again' : 'Post it myself'}</button>
+          ${p.imgs.length > 1 ? '<button class="btn small" data-act="copy2">Copy image 2</button>' : ''}
+          <button class="btn small" data-act="saveimg">${p.imgs.length > 1 ? 'Save images' : 'Save image'}</button>
+          <button class="btn small" data-act="copytext">Copy text</button>
           <button class="btn small" data-act="swap">New fund</button>
           <button class="btn small" data-act="amount">New numbers</button>
           <button class="btn small" data-act="rewrite">Rewrite text</button>
@@ -520,10 +623,13 @@ $('drafts').addEventListener('click', e => {
   const used = new Set(state.drafts.filter(d => d !== p).map(histKey));
   const act = btn.dataset.act;
   if (act === 'remove') { state.drafts = state.drafts.filter(d => d !== p); renderDrafts(); return; }
-  if (act === 'manual') { postManually(p, btn); return; }
+  if (act === 'manual') { postManually(p); return; }
+  if (act === 'saveimg') { saveImage(p); return; }
+  if (act === 'copy2') { copyImage(p.imgs[1]).then(() => toast('Image 2 copied. Paste it into the same X post')).catch(() => toast("Couldn't copy. Use Save images and drag both in")); return; }
+  if (act === 'copytext') { navigator.clipboard.writeText(finalText(p)).then(() => toast('Text copied'), () => toast("Couldn't copy, select the text and copy it")); return; }
   if (act === 'swap') {
     const fund = chooseFund(new Set(state.drafts.map(d => d.sym))); if (!fund) return toast('No other funds left in the pool');
-    const kind = p.kind === 'growth' && fund.yield > GROWTH_MAX_YIELD ? 'lump' : p.kind;
+    const kind = (p.kind === 'growth' || p.kind === 'nowlater') && fund.yield > GROWTH_MAX_YIELD ? 'lump' : p.kind;
     const np = makePost(fund, kind, used); if (!np) return toast('Could not find a new combo, try again');
     np.at = p.at; np.link = p.link; Object.assign(p, np, { id: p.id });
   } else if (act === 'amount') {
@@ -568,25 +674,42 @@ function rememberManual(p) {
   state.history.add(histKey(p));
 }
 const isTouch = matchMedia('(pointer: coarse)').matches;
-async function postManually(p, btn) {
-  const text = finalText(p);
-  const blob = await (await fetch(p.img)).blob();
-  const file = new File([blob], `${p.sym}-dividends.png`, { type: 'image/png' });
+function dataURLtoBlob(url) {
+  const [head, data] = url.split(','), bin = atob(data), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: head.match(/:(.*?);/)[1] });
+}
+function saveImage(p) {
+  p.imgs.forEach((src, i) => {
+    const a = document.createElement('a'); a.href = src; a.download = `${p.sym}-dividends${p.imgs.length > 1 ? '-' + (i + 1) : ''}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+}
+function copyImage(src) {
+  try { return navigator.clipboard.write([new ClipboardItem({ 'image/png': Promise.resolve(dataURLtoBlob(src)) })]); }
+  catch (e) { return Promise.reject(e); }
+}
+function postManually(p) {
+  // No awaits before copy/share: Safari and iPhone only allow them right after the tap.
+  const text = finalText(p), pair = p.imgs.length > 1;
+  const files = p.imgs.map((src, i) => new File([dataURLtoBlob(src)], `${p.sym}-dividends-${i + 1}.png`, { type: 'image/png' }));
   const markSent = () => { p.sent = true; rememberManual(p); renderDrafts(); };
-  if (isTouch && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      try { await navigator.clipboard.writeText(text); } catch (e) {}
-      await navigator.share({ files: [file], text });
-      markSent(); toast('Sent to the share sheet. If the text is missing in X, paste it, it\'s copied');
-    } catch (e) { if (e.name !== 'AbortError') toast("Couldn't open the share sheet: " + e.message); }
+  if (isTouch && navigator.canShare && navigator.canShare({ files, text })) {
+    navigator.share({ files, text })
+      .then(() => { markSent(); toast('Pick X in the share sheet. If the text is missing, tap Copy text and paste it', 8000); })
+      .catch(e => { if (e.name !== 'AbortError') toast("Couldn't open the share sheet. Use Save image instead"); });
     return;
   }
-  let copied = false;
-  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); copied = true; } catch (e) {}
-  if (!copied) { const a = document.createElement('a'); a.href = p.img; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); }
-  window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
-  markSent();
-  toast(copied ? 'Image copied. In X, press Ctrl+V (Cmd+V on Mac) to add it, then post' : 'Image downloaded. Drag it into the X post, then post');
+  const openX = () => window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  copyImage(p.imgs[0]).then(() => {
+    openX(); markSent();
+    toast(pair
+      ? 'Image 1 copied. Paste it in X with Cmd+V (Ctrl+V on Windows), then come back, click Copy image 2 and paste again'
+      : 'Image copied. Click in the X post box and press Cmd+V (Ctrl+V on Windows) to add it', 10000);
+  }).catch(() => {
+    saveImage(p); openX(); markSent();
+    toast(pair ? 'Both images saved to Downloads. Drag them into the X post box together' : 'Image saved to your Downloads. Drag it into the X post box', 8000);
+  });
 }
 
 /* =====================================================================
@@ -663,9 +786,9 @@ async function scheduleAll() {
     const files = [];
     for (const p of state.drafts) {
       const base = fileBase(p);
-      const record = { id: p.id, sym: p.sym, kind: p.kind, params: p.params, yield: p.fund.yield, text: finalText(p), link: p.link, post_at: p.at.toISOString(), created_at: new Date().toISOString() };
+      const record = { id: p.id, sym: p.sym, sym2: p.fund2 ? p.fund2.sym : undefined, kind: p.kind, params: p.params, yield: p.fund.yield, images: p.imgs.length, text: finalText(p), link: p.link, post_at: p.at.toISOString(), created_at: new Date().toISOString() };
       files.push({ path: `queue/${base}.json`, b64: b64utf8(JSON.stringify(record, null, 2)) });
-      files.push({ path: `queue/${base}.png`, b64: p.img.split(',')[1] });
+      p.imgs.forEach((src, i) => files.push({ path: `queue/${base}${i ? '-' + (i + 1) : ''}.png`, b64: src.split(',')[1] }));
     }
     await commitFiles(files, `Queue ${state.drafts.length} posts`);
     toast(`Scheduled ${state.drafts.length} posts`);
@@ -690,9 +813,9 @@ async function renderList(dir, box, opts = {}) {
     if (!files.length) { box.innerHTML = `<div class="empty">${opts.emptyText}</div>`; return; }
     const recs = await Promise.all(files.map(async f => ({ f, r: await readJSON(f.path) })));
     box.innerHTML = recs.map(({ f, r }) => `<article class="post" data-path="${esc(f.path)}">
-      <img alt="Image for ${esc(r.sym)} post" data-img="${opts.images ? esc(f.path.replace(/\.json$/, '.png')) : ''}"${opts.images ? '' : ' hidden'}>
+      ${opts.images ? `<div class="pics${(r.images || 1) > 1 ? ' pair' : ''}">${Array.from({ length: r.images || 1 }, (_, i) => `<img alt="Image ${i + 1} for ${esc(r.sym)} post" data-img="${esc(f.path.replace(/\.json$/, i ? '-' + (i + 1) + '.png' : '.png'))}">`).join('')}</div>` : ''}
       <div class="side">
-        <div class="meta"><span class="tag">$${esc(r.sym)} ${pct(r.yield)}</span><span>${esc(KIND_LABEL[r.kind] || r.kind)}</span></div>
+        <div class="meta"><span class="tag">$${esc(r.sym)}${r.sym2 ? ' vs $' + esc(r.sym2) : ''}</span><span>${esc(KIND_LABEL[r.kind] || r.kind)}</span></div>
         <div class="status-line">${opts.line(r)}</div>
         <textarea readonly>${esc(r.text)}</textarea>
         ${r.error ? `<div class="err-text">${esc(r.error)}</div>` : ''}
@@ -718,11 +841,11 @@ const showFailed = () => renderList('failed', $('failed'), {
 });
 $('scheduled').addEventListener('click', async e => {
   const btn = e.target.closest('[data-act]'); if (!btn) return;
-  const path = btn.closest('.post').dataset.path, png = path.replace(/\.json$/, '.png');
+  const path = btn.closest('.post').dataset.path, pngs = [...btn.closest('.post').querySelectorAll('img[data-img]')].map(i => i.dataset.img);
   btn.disabled = true;
   try {
     if (btn.dataset.act === 'unschedule') {
-      await commitFiles([{ path, del: true }, { path: png, del: true }], 'Unschedule post');
+      await commitFiles([{ path, del: true }, ...pngs.map(x => ({ path: x, del: true }))], 'Unschedule post');
       toast('Unscheduled');
     } else {
       const r = await readJSON(path); r.post_at = new Date().toISOString();
@@ -767,10 +890,10 @@ function showSetup(err) {
   else box.innerHTML = '';
 }
 let toastTimer;
-function toast(msg) {
+function toast(msg, ms = 4200) {
   document.querySelector('.toast')?.remove(); clearTimeout(toastTimer);
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; t.setAttribute('role', 'status');
-  document.body.appendChild(t); toastTimer = setTimeout(() => t.remove(), 4200);
+  document.body.appendChild(t); toastTimer = setTimeout(() => t.remove(), ms);
 }
 $('genBtn').addEventListener('click', generate);
 
