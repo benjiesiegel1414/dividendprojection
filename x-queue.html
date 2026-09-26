@@ -263,24 +263,26 @@ const G_MONTHLY = [100, 200, 250, 500, 750, 1000];
 const G_YEARS = [10, 15, 20, 25, 30];
 const ASKS = ['What would you put in? 👇', 'Would you hold it? 👇', 'How much do you own? 👇', 'Are you holding this one? 👇', ''];
 const HIGH_YIELD = 15, GROWTH_MAX_YIELD = 12;
+const ANNUAL_MIN_YIELD = 20, ANNUAL_MIN_AUM = 20e6, ANNUAL_SHARE = 0.15;
 
 const PAIR_KINDS = ['versus', 'nowlater', 'paysneeds'];
 const isPair = k => PAIR_KINDS.includes(k);
 function paramsFor(kind) {
   if (kind === 'lump' || kind === 'versus') return { amt: pick(LUMP_AMOUNTS) };
+  if (kind === 'annual') return { amt: pick(LUMP_AMOUNTS.filter(a => a >= 10000 && a <= 500000)) };
   if (kind === 'nowlater') return { amt: pick(LUMP_AMOUNTS.filter(a => a >= 10000 && a <= 500000)), years: pick(G_YEARS) };
   if (kind === 'paysneeds') return { amt: pick(LUMP_AMOUNTS.filter(a => a <= 250000)), goal: pick(GOALS) };
   if (kind === 'goal') return { goal: pick(GOALS) };
   return { start: pick(G_START), monthly: pick(G_MONTHLY), years: pick(G_YEARS) };
 }
 function histKey(p) {
-  const k = p.kind === 'lump' || p.kind === 'versus' ? p.params.amt : p.kind === 'goal' ? p.params.goal : p.kind === 'nowlater' ? `${p.params.amt}-${p.params.years}` : p.kind === 'paysneeds' ? `${p.params.amt}-${p.params.goal}` : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
+  const k = p.kind === 'lump' || p.kind === 'versus' || p.kind === 'annual' ? p.params.amt : p.kind === 'goal' ? p.params.goal : p.kind === 'nowlater' ? `${p.params.amt}-${p.params.years}` : p.kind === 'paysneeds' ? `${p.params.amt}-${p.params.goal}` : `${p.params.start}-${p.params.monthly}-${p.params.years}`;
   const sym = p.kind === 'versus' ? [p.sym, p.fund2.sym].sort().join('+') : p.sym;
   return `${sym}_${p.kind}_${k}`;
 }
 function compute(p) {
   const f = p.fund, y = f.yield;
-  if (p.kind === 'lump') {
+  if (p.kind === 'lump' || p.kind === 'annual') {
     const annual = p.params.amt * y / 100;
     p.calc = { annual, monthly: annual / 12, per: annual / f.periods };
   } else if (p.kind === 'versus') {
@@ -311,6 +313,17 @@ function writeText(p) {
   const caveat = hy ? '\n\nAssumes the yield holds, which is never guaranteed' : '';
   const ask = pick(ASKS), end = ask ? '\n\n' + ask : '';
   let t;
+  if (p.kind === 'annual') {
+    const amt = usd0.format(p.params.amt), yr = money(c.annual);
+    const paid = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 12 ? `\n\nPaid monthly, about ${money(c.monthly)} every month` : '';
+    t = pick([
+      () => `${s}: ${amt} invested could pay you about ${yr} a year\n\nThat's at its ${y} yield today${paid}`,
+      () => `${s} 👇\n\n${amt} invested\n${yr} a year in income\n\nBased on its ${y} yield`,
+      () => `${s} pays a ${y} yield\n\n${amt} in it could pay about ${yr} over the next 12 months${paid}`,
+      () => `${s}: what ${amt} could pay you in a year 👇\n\n${yr}\n\nAt today's ${y} yield`,
+    ])();
+    return t + '\n\nAssumes the yield holds, which is never guaranteed' + end;
+  }
   if (p.kind === 'lump') {
     const amt = usd0.format(p.params.amt);
     const perLine = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 4 ? `\n\nPaid quarterly, about ${money(c.per)} each payout` : '';
@@ -354,7 +367,7 @@ function writeText(p) {
 }
 function linkFor(p) {
   const q = new URLSearchParams({ etf: p.fund.sym });
-  if (p.kind === 'lump' || p.kind === 'versus') { q.set('a', p.params.amt); q.set('m', 0); }
+  if (p.kind === 'lump' || p.kind === 'versus' || p.kind === 'annual') { q.set('a', p.params.amt); q.set('m', 0); }
   if (p.kind === 'nowlater') { q.set('a', p.params.amt); q.set('m', 0); q.set('y', p.params.years); }
   if (p.kind === 'paysneeds') { q.set('a', p.params.amt); q.set('m', 0); }
   if (p.kind === 'goal') q.set('goal', p.params.goal);
@@ -384,7 +397,13 @@ function drawImage(p) {
   ctx.fillStyle = '#93ADA4'; ctx.font = F(500, 20); ctx.textAlign = 'right'; ctx.fillText('dividendprojection.com', W - 72, 86);
 
   let line1, line2, big, unit, facts, bars;
-  if (p.kind === 'lump') {
+  if (p.kind === 'annual') {
+    line1 = `${usd0.format(p.params.amt)} in ${f.sym}`; line2 = 'could pay me';
+    big = money(c.annual); unit = '/year';
+    facts = [`${pct(f.yield)} yield, paid ${payWord(f.periods)}`, `${money(c.monthly)} a month`];
+    const a = p.params.amt, set = [...new Set([a / 5, a / 2, a, a * 2, a * 5].map(v => roundTo(v, v >= 1000 ? 500 : 100)))];
+    bars = set.map(v => ({ v: v * f.yield / 100, top: short(v * f.yield / 100), label: short(v), on: v === a }));
+  } else if (p.kind === 'lump') {
     line1 = `${usd0.format(p.params.amt)} in ${f.sym}`; line2 = 'could pay me';
     big = money(c.monthly); unit = '/month';
     facts = [`${pct(f.yield)} yield, paid ${payWord(f.periods)}`, `${money(c.annual)} a year`];
@@ -524,6 +543,10 @@ function pool() {
   const favs = usable.filter(f => fav.includes(f.sym));
   return { all: [...new Set([...top, ...favs])], favs };
 }
+function highYieldPool(exclude) {
+  const excl = new Set(tickers(cfg.excl));
+  return state.funds.filter(f => f.yield >= ANNUAL_MIN_YIELD && f.aum >= ANNUAL_MIN_AUM && !excl.has(f.sym) && !exclude.has(f.sym));
+}
 function pickKind(fund) {
   const r = Math.random();
   const k = r < .35 ? 'lump' : r < .55 ? 'goal' : r < .7 ? 'growth' : r < .85 ? 'paysneeds' : 'nowlater';
@@ -571,8 +594,11 @@ async function generate() {
   try { await document.fonts.load('600 40px Geist'); await document.fonts.load('500 30px Geist'); } catch (e) {}
   const usedSyms = new Set(), usedKeys = new Set(), out = [];
   for (let i = 0; i < n; i++) {
-    const fund = chooseFund(usedSyms); if (!fund) break;
-    const p = makePost(fund, pickKind(fund), usedKeys); if (!p) { i--; usedSyms.add(fund.sym); continue; }
+    // Mix in high-yield "per year" posts about 1 in 7 times
+    const hyFunds = highYieldPool(usedSyms);
+    const useAnnual = hyFunds.length && Math.random() < ANNUAL_SHARE;
+    const fund = useAnnual ? pick(hyFunds) : chooseFund(usedSyms); if (!fund) break;
+    const p = makePost(fund, useAnnual ? 'annual' : pickKind(fund), usedKeys); if (!p) { i--; usedSyms.add(fund.sym); continue; }
     p.at = times[i]; usedSyms.add(fund.sym); if (p.fund2) usedSyms.add(p.fund2.sym); usedKeys.add(histKey(p)); out.push(p);
   }
   state.drafts = out;
@@ -585,7 +611,7 @@ async function generate() {
 const pad = v => String(v).padStart(2, '0');
 const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const fmtWhen = d => d.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-const KIND_LABEL = { lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', paysneeds: 'Pays vs needs (2 images)', nowlater: 'Today vs later (2 images)' };
+const KIND_LABEL = { annual: 'High yield: per year', lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', paysneeds: 'Pays vs needs (2 images)', nowlater: 'Today vs later (2 images)' };
 const OLD_KIND_LABEL = { versus: 'Head to head (2 images)' };
 
 function renderDrafts() {
@@ -609,7 +635,7 @@ function renderDrafts() {
           <span class="tag${hy ? ' hy' : ''}">$${esc(p.sym)} ${pct(p.fund.yield)}</span>
           ${p.fund2 ? `<span class="tag${p.fund2.yield >= HIGH_YIELD ? ' hy' : ''}">$${esc(p.fund2.sym)} ${pct(p.fund2.yield)}</span>` : ''}
           ${p.sent ? '<span class="tag">Sent to X</span>' : ''}
-          <select data-act="kind" aria-label="Post type">${Object.entries(KIND_LABEL).map(([k, v]) => `<option value="${k}"${k === p.kind ? ' selected' : ''}${(k === 'growth' || k === 'nowlater') && p.fund.yield > GROWTH_MAX_YIELD ? ' disabled' : ''}>${v}</option>`).join('')}</select>
+          <select data-act="kind" aria-label="Post type">${Object.entries(KIND_LABEL).map(([k, v]) => `<option value="${k}"${k === p.kind ? ' selected' : ''}${((k === 'growth' || k === 'nowlater') && p.fund.yield > GROWTH_MAX_YIELD) || (k === 'annual' && p.fund.yield < ANNUAL_MIN_YIELD) ? ' disabled' : ''}>${v}</option>`).join('')}</select>
         </div>
         <textarea data-act="text" aria-label="Post text">${esc(p.text)}</textarea>
         <div class="row">
@@ -654,7 +680,8 @@ $('drafts').addEventListener('click', e => {
   if (act === 'copy2') { copyImage(p.imgs[1]).then(() => toast('Image 2 copied. Paste it into the same X post')).catch(() => toast("Couldn't copy. Use Save images and drag both in")); return; }
   if (act === 'copytext') { navigator.clipboard.writeText(finalText(p)).then(() => toast('Text copied'), () => toast("Couldn't copy, select the text and copy it")); return; }
   if (act === 'swap') {
-    const fund = chooseFund(new Set(state.drafts.map(d => d.sym))); if (!fund) return toast('No other funds left in the pool');
+    const taken = new Set(state.drafts.map(d => d.sym));
+    const fund = p.kind === 'annual' ? pick(highYieldPool(taken)) : chooseFund(taken); if (!fund) return toast('No other funds left in the pool');
     const kind = (p.kind === 'growth' || p.kind === 'nowlater') && fund.yield > GROWTH_MAX_YIELD ? 'lump' : p.kind;
     const np = makePost(fund, kind, used); if (!np) return toast('Could not find a new combo, try again');
     np.at = p.at; np.link = p.link; Object.assign(p, np, { id: p.id });
