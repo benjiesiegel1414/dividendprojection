@@ -1,0 +1,40 @@
+name: Build fund pages
+
+on:
+  schedule:
+    - cron: "50 11 * * *"   # daily, about 7:50am Eastern, after the database update
+  workflow_dispatch:
+  push:
+    paths:
+      - "content/funds.json"
+      - "scripts/build-fund-pages.js"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-bots
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build /etf pages from the database
+        run: node scripts/build-fund-pages.js
+      - name: Save changes
+        run: |
+          git config user.name "fund-pages-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add etf/ sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update fund pages [skip ci]"
+            git pull --rebase
+            git push
+          fi
