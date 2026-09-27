@@ -1,0 +1,125 @@
+{
+  "SCHD": {
+    "issuer": "Schwab Asset Management",
+    "inception": "October 20, 2011",
+    "strategy": "Index fund tracking the Dow Jones U.S. Dividend 100 Index",
+    "about": [
+      "SCHD owns 100 U.S. companies picked by a strict set of rules. To qualify, a company needs at least 10 straight years of dividend payments, and REITs are left out. The survivors are ranked on four things: free cash flow compared with total debt, return on equity, dividend yield and five-year dividend growth. The top 100 make the fund.",
+      "No single stock can be more than 4% of the index and no sector more than 25%, so the fund stays spread out. The lineup is rebuilt every March. Health care, consumer staples and energy tend to be its biggest sectors, and big tech is a small slice, which is why SCHD often behaves very differently from the S&P 500.",
+      "SCHD is built for dividends that grow over time rather than the biggest possible check today. Most of its payouts have historically been qualified dividends, and at a tiny expense ratio it is one of the cheapest ways to own a basket of dividend growers."
+    ],
+    "sources": [["Schwab: SCHD fund page", "https://www.schwabassetmanagement.com/products/schd"], ["S&P Dow Jones Indices: dividend index methodology", "https://www.spglobal.com/spdji/en/documents/methodologies/methodology-dj-dividend-indices.pdf"]],
+    "faq": [["What index does SCHD track?", "The Dow Jones U.S. Dividend 100 Index: 100 U.S. companies with at least 10 years of dividends, ranked on cash flow to debt, return on equity, dividend yield and five-year dividend growth."]],
+    "blog": "/blog/schd-review"
+  },
+  "JEPI": {
+    "issuer": "J.P. Morgan Asset Management",
+    "inception": "May 20, 2020",
+    "strategy": "Actively managed stocks plus S&P 500 call options sold through equity-linked notes",
+    "about": [
+      "JEPI is an actively managed income fund with two parts. Most of the money sits in a portfolio of large U.S. stocks chosen by J.P. Morgan's research team, with a tilt toward steadier, lower-volatility companies. The rest, up to about 20% of the fund, goes into equity-linked notes (ELNs) that sell call options on the S&P 500.",
+      "Those option sales are where most of JEPI's monthly income comes from. The trade-off is familiar for covered call funds: the fund collects premium every month, but gives up some of the upside when the market rallies hard. Its lower-volatility stock picks are meant to smooth the ride in down markets.",
+      "Because much of the income comes through the ELNs, a large share of JEPI's distributions is usually taxed as ordinary income rather than as qualified dividends. That makes JEPI a popular choice inside IRAs and other tax-advantaged accounts."
+    ],
+    "sources": [["J.P. Morgan: JEPI fund page", "https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-equity-premium-income-etf-etf-shares-46641q332"]],
+    "faq": [["Where does JEPI's income come from?", "Mostly from call options on the S&P 500 sold through equity-linked notes, plus the dividends from the stocks it owns."], ["Are JEPI's dividends qualified?", "A large share is usually taxed as ordinary income because of the equity-linked notes. The exact split is reported on your year-end 1099-DIV."]]
+  },
+  "JEPQ": {
+    "issuer": "J.P. Morgan Asset Management",
+    "inception": "May 3, 2022",
+    "strategy": "Actively managed Nasdaq-100 stocks plus Nasdaq-100 call options sold through equity-linked notes",
+    "about": [
+      "JEPQ is the Nasdaq version of JEPI. It holds a portfolio of stocks drawn mainly from the Nasdaq-100, so the biggest positions are large technology and growth companies, and adds equity-linked notes (ELNs) that sell call options on the Nasdaq-100 index.",
+      "The Nasdaq-100 moves more than the S&P 500, and more movement means options pay higher premiums. That is why JEPQ usually pays noticeably more than JEPI. It also means JEPQ's share price swings more, and it gives up more upside than JEPI when tech rallies sharply.",
+      "Like JEPI, much of JEPQ's income arrives through the ELNs and is typically taxed as ordinary income, so where you hold it matters. Many investors keep it in an IRA and use JEPI and JEPQ side by side for a mix of steadier and higher income."
+    ],
+    "sources": [["J.P. Morgan: JEPQ fund page", "https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-nasdaq-equity-premium-income-etf-etf-shares-46654q203"]],
+    "faq": [["What is the difference between JEPI and JEPQ?", "JEPI sells options on the S&P 500 and holds lower-volatility large caps. JEPQ sells options on the Nasdaq-100 and holds mostly tech-heavy Nasdaq stocks, so it usually pays more and moves more."]]
+  },
+  "QQQI": {
+    "issuer": "NEOS Investments",
+    "inception": "January 29, 2024",
+    "strategy": "Nasdaq-100 stocks plus a data-driven NDX index option strategy",
+    "about": [
+      "QQQI holds the companies in the Nasdaq-100 and runs an options strategy on the Nasdaq-100 index itself (NDX). It sells index call options to collect premium for its monthly payouts, and it can also buy calls at higher strikes, which lets it keep part of the upside in strong rallies instead of capping it completely.",
+      "Using index options instead of options on an ETF matters for taxes. NDX options are Section 1256 contracts, so gains and losses on them are taxed 60% long-term and 40% short-term no matter how long they were held. NEOS also reports that QQQI's distributions have been classified as return of capital, which generally lowers your cost basis rather than being taxed right away.",
+      "The stock side is concentrated in big tech, so QQQI rises and falls with the Nasdaq. The options add income and soften small drops, but they do not protect against a real sell-off."
+    ],
+    "sources": [["NEOS: QQQI fund page", "https://neosfunds.com/qqqi/"]],
+    "faq": [["Is QQQI's income return of capital?", "NEOS states QQQI's distributions have been classified as return of capital, which generally lowers your cost basis instead of being taxed right away. Your 1099-DIV has the final breakdown."]],
+    "blog": "/blog/qqqi-review"
+  },
+  "SPYI": {
+    "issuer": "NEOS Investments",
+    "inception": "August 29, 2022",
+    "strategy": "S&P 500 stocks plus a data-driven SPX index option strategy",
+    "about": [
+      "SPYI was NEOS's first high-income ETF. It holds the stocks in the S&P 500 and sells call options on the S&P 500 index (SPX) to fund its monthly payouts. It may also buy SPX calls at higher strike prices, a call spread that lets the fund keep some upside in rising markets.",
+      "Because it uses SPX index options, the option gains and losses fall under Section 1256 and are taxed 60% long-term and 40% short-term. NEOS reports that SPYI's distributions have been classified as return of capital, and the fund also looks for tax loss harvesting opportunities.",
+      "Compared with its Nasdaq sibling QQQI, SPYI sits on a broader and less tech-heavy stock portfolio and has a longer track record, while usually paying a little less."
+    ],
+    "sources": [["NEOS: SPYI fund page", "https://neosfunds.com/spyi/"]],
+    "faq": [["What is the difference between SPYI and QQQI?", "SPYI uses the S&P 500 and SPX options, QQQI uses the Nasdaq-100 and NDX options. SPYI is broader and older, QQQI is more tech-heavy and usually yields more."]],
+    "blog": "/blog/spyi-review"
+  },
+  "VYM": {
+    "issuer": "Vanguard",
+    "inception": "November 10, 2006",
+    "strategy": "Index fund tracking the FTSE High Dividend Yield Index",
+    "about": [
+      "VYM tracks the FTSE High Dividend Yield Index, which takes large U.S. companies and keeps the ones forecast to pay above-average dividends. REITs are excluded. The result is a broad basket of several hundred established companies, weighted by size.",
+      "Because it owns so many stocks, VYM is far more spread out than a concentrated dividend fund. Financials, health care, industrials, consumer staples and energy usually make up much of the portfolio. Its yield typically sits between a plain S&P 500 fund and higher-yield dividend strategies.",
+      "Vanguard charges a very low expense ratio, and VYM's dividends have historically been mostly qualified. It pays quarterly and is a common choice for investors who want broad dividend exposure without picking individual stocks."
+    ],
+    "sources": [["Vanguard: VYM fund page", "https://investor.vanguard.com/investment-products/etfs/profile/vym"]],
+    "faq": [["What index does VYM track?", "The FTSE High Dividend Yield Index, which holds large U.S. companies forecast to pay above-average dividends, excluding REITs."]]
+  },
+  "VIG": {
+    "issuer": "Vanguard",
+    "inception": "April 21, 2006",
+    "strategy": "Index fund tracking the S&P U.S. Dividend Growers Index",
+    "about": [
+      "VIG is built around dividend growth, not dividend size. It tracks the S&P U.S. Dividend Growers Index, which requires at least 10 consecutive years of dividend increases. It then removes the highest-yielding 25% of eligible companies, because an unusually high yield can be a sign a dividend is at risk.",
+      "What is left is a portfolio of quality companies with long records of raising payouts, weighted by size with a cap on any single stock. That tilts VIG toward large, profitable businesses, including some big technology and health care names that SCHD and VYM hold less of.",
+      "The trade-off is a low starting yield. VIG is designed for investors who care more about how fast their income grows over the years, and about total return, than about the size of today's dividend."
+    ],
+    "sources": [["Vanguard: VIG fund page", "https://investor.vanguard.com/investment-products/etfs/profile/vig"], ["S&P Dow Jones Indices: S&P U.S. Dividend Growers Index", "https://www.spglobal.com/spdji/en/indices/dividends-factors/sp-us-dividend-growers-index/"]],
+    "faq": [["Why is VIG's yield so low?", "Its index requires 10 straight years of dividend increases and removes the top 25% highest yielders, so it favors steady growers over high payers."]]
+  },
+  "DGRO": {
+    "issuer": "BlackRock iShares",
+    "inception": "June 10, 2014",
+    "strategy": "Index fund tracking the Morningstar US Dividend Growth Index",
+    "about": [
+      "DGRO tracks the Morningstar US Dividend Growth Index, which looks for companies with at least five years of uninterrupted dividend growth and screens out payers whose dividends look stretched compared with their earnings. The highest-yielding names are left out as well.",
+      "With close to 400 holdings, DGRO is one of the broadest dividend growth funds available. Financials, technology, health care, consumer staples and industrials make up most of the portfolio, so it sits between a pure dividend fund and the overall market.",
+      "It costs very little to own and pays quarterly. The shorter five-year growth requirement, compared with VIG's ten, lets DGRO include companies earlier in their dividend growth story."
+    ],
+    "sources": [["iShares: DGRO fund page", "https://www.ishares.com/us/products/264623/ishares-core-dividend-growth-etf"]],
+    "faq": [["How is DGRO different from VIG?", "DGRO requires five years of dividend growth and holds close to 400 stocks. VIG requires ten years and removes the top 25% highest yielders."]]
+  },
+  "DIVO": {
+    "issuer": "Amplify ETFs, sub-advised by Capital Wealth Planning",
+    "inception": "December 14, 2016",
+    "strategy": "About 20 to 25 dividend stocks plus tactical covered calls on individual holdings",
+    "about": [
+      "DIVO holds a focused portfolio of roughly 20 to 25 large U.S. companies with histories of dividend growth, chosen by its sub-adviser, Capital Wealth Planning. On top of those dividends, the managers sell covered calls on individual stocks when they think option prices are attractive.",
+      "That tactical approach is different from funds that sell index options every month. DIVO writes calls on only part of the portfolio and only some of the time, which lets it keep more upside when stocks rise, at the cost of a lower yield than full-time covered call funds.",
+      "The result is a monthly payer with a moderate yield that has aimed for a balance of income and growth since 2016. Its top holdings include names like Microsoft, Apple, Caterpillar, Visa and JPMorgan."
+    ],
+    "sources": [["Amplify ETFs: DIVO fund page", "https://amplifyetfs.com/divo/"]],
+    "faq": [["How does DIVO's covered call strategy work?", "The managers sell calls on individual stocks, and only on part of the portfolio when option prices look attractive, rather than selling index options every month."]]
+  },
+  "VOO": {
+    "issuer": "Vanguard",
+    "inception": "September 7, 2010",
+    "strategy": "Index fund tracking the S&P 500",
+    "about": [
+      "VOO tracks the S&P 500, the 500 large U.S. companies that make up most of the stock market's value. It is not a dividend fund, but most of those companies pay dividends, so VOO pays a small quarterly dividend that has grown over time.",
+      "Its yield is low because the biggest companies in the index, especially in technology, pay little or nothing compared with their share prices. Most of VOO's return has come from price growth rather than income, which is why its total return is far larger than its dividends alone would suggest.",
+      "With one of the lowest expense ratios available, VOO is often the core holding people compare every dividend fund against. Running its numbers here shows how much less income a growth-driven index pays than a dedicated dividend fund."
+    ],
+    "sources": [["Vanguard: VOO fund page", "https://investor.vanguard.com/investment-products/etfs/profile/voo"]],
+    "faq": [["Does VOO pay dividends?", "Yes. VOO pays a small dividend every quarter from the S&P 500 companies it owns."]]
+  }
+}
