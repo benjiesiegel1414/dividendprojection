@@ -107,10 +107,11 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
 
   <section id="tab-drafts">
     <div class="toolbar">
-      <label>Day
-        <select id="day"><option value="0">Today</option><option value="1" selected>Tomorrow</option><option value="2">In 2 days</option></select>
+      <label>Start <input id="startDate" type="date"></label>
+      <label>Days
+        <select id="days"><option>1</option><option>2</option><option>3</option><option>5</option><option selected>7</option><option>10</option><option>14</option><option>21</option><option>30</option></select>
       </label>
-      <label>Posts <input id="howMany" type="number" min="1" max="20" value="10" style="width:64px"></label>
+      <label>Posts per day <input id="howMany" type="number" min="1" max="20" value="2" style="width:64px"></label>
       <button class="btn" id="genBtn" disabled>Generate queue</button>
       <span class="spacer"></span>
       <span class="cost" id="costNote"></span>
@@ -317,10 +318,10 @@ function writeText(p) {
     const amt = usd0.format(p.params.amt), yr = money(c.annual);
     const paid = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 12 ? `\n\nPaid monthly, about ${money(c.monthly)} every month` : '';
     t = pick([
-      () => `${s}: ${amt} invested could pay you about ${yr} a year\n\nThat's at its ${y} yield today${paid}`,
+      () => `${s}: ${amt} invested could pay you about ${yr} a year\n\nThat's at its current ${y} yield${paid}`,
       () => `${s} 👇\n\n${amt} invested\n${yr} a year in income\n\nBased on its ${y} yield`,
       () => `${s} pays a ${y} yield\n\n${amt} in it could pay about ${yr} over the next 12 months${paid}`,
-      () => `${s}: what ${amt} could pay you in a year 👇\n\n${yr}\n\nAt today's ${y} yield`,
+      () => `${s}: what ${amt} could pay you in a year 👇\n\n${yr}\n\nAt its current ${y} yield`,
     ])();
     return t + '\n\nAssumes the yield holds, which is never guaranteed' + end;
   }
@@ -328,21 +329,21 @@ function writeText(p) {
     const amt = usd0.format(p.params.amt);
     const perLine = f.periods === 52 ? `\n\nPaid weekly, about ${money(c.per)} every week` : f.periods === 4 ? `\n\nPaid quarterly, about ${money(c.per)} each payout` : '';
     t = pick([
-      () => `${s} pays about ${money(c.monthly)}/month on a ${amt} investment\n\nThat's ${money(c.annual)} a year at today's ${y} yield${perLine}`,
-      () => `${s} 👇\n\n${amt} invested pays you\n${money(c.monthly)} every month\n${money(c.annual)} every year\n\nBased on its ${y} yield today`,
+      () => `${s} pays about ${money(c.monthly)}/month on a ${amt} investment\n\nThat's ${money(c.annual)} a year at its current ${y} yield${perLine}`,
+      () => `${s} 👇\n\n${amt} invested pays you\n${money(c.monthly)} every month\n${money(c.annual)} every year\n\nBased on its current ${y} yield`,
       () => `${s}: put ${amt} in today and you'd collect about ${money(c.annual)} in dividends over the next 12 months\n\nThat's ${money(c.monthly)} a month without selling a share`,
     ])();
   } else if (p.kind === 'goal') {
     const g = usd0.format(p.params.goal);
     t = pick([
       () => `${s} 👇\n\nWant ${g}/month in dividends?\nYou'd need about ${usd0.format(c.need)} invested at its ${y} yield`,
-      () => `${s}: how much do you need to make ${g} a month?\n\nAbout ${usd0.format(c.need)}\n\nThat's at today's ${y} yield`,
+      () => `${s}: how much do you need to make ${g} a month?\n\nAbout ${usd0.format(c.need)}\n\nThat's at its current ${y} yield`,
       () => `${s} at ${y} yield\n\n${g}/month in dividends takes roughly ${usd0.format(c.need)} invested`,
     ])();
   } else if (p.kind === 'paysneeds') {
     const amt = usd0.format(p.params.amt), g = usd0.format(p.params.goal);
     t = pick([
-      () => `${s} 👇\n\n${amt} pays about ${money(c.monthly)}/month\n${g}/month takes about ${usd0.format(c.need)}\n\nBased on its ${y} yield today`,
+      () => `${s} 👇\n\n${amt} pays about ${money(c.monthly)}/month\n${g}/month takes about ${usd0.format(c.need)}\n\nBased on its current ${y} yield`,
       () => `${s} at ${y} yield\n\nWhat ${amt} pays: about ${money(c.monthly)}/month\nWhat ${g}/month takes: about ${usd0.format(c.need)}`,
       () => `${s}: two ways to look at it\n\n${amt} invested pays about ${money(c.monthly)} a month\nReplacing ${g} a month takes about ${usd0.format(c.need)}`,
     ])();
@@ -353,7 +354,7 @@ function writeText(p) {
       () => `${s} 👇\n\n${amt} pays about ${money(c.monthly)}/month today\nReinvest every dividend for ${yrs} years and it could pay ${money(c.later)}/month`,
       () => `${s}: what ${amt} pays you\n\nToday: about ${money(c.monthly)}/month\nIn ${yrs} years, reinvesting every dividend: about ${money(c.later)}/month`,
     ])();
-    return t + `\n\nAssumes today's ${y} yield holds and no price change` + end;
+    return t + `\n\nAssumes its current ${y} yield holds and no price change` + end;
   } else {
     const { start, monthly, years } = p.params;
     const plan = start ? `${usd0.format(start)} today + ${usd0.format(monthly)}/month for ${years} years` : `${usd0.format(monthly)}/month for ${years} years`;
@@ -361,7 +362,7 @@ function writeText(p) {
       () => `${s} 👇\n\n${plan}\n\nWith dividends reinvested, it could pay about ${money(c.monthly)}/month by year ${years}`,
       () => `${s}: ${start ? `start with ${usd0.format(start)}, ` : ''}add ${usd0.format(monthly)} every month and reinvest every dividend\n\nIn ${years} years that's about ${money(c.monthly)}/month in income`,
     ])();
-    return t + `\n\nAssumes today's ${y} yield holds and no price change` + end;
+    return t + `\n\nAssumes its current ${y} yield holds and no price change` + end;
   }
   return t + caveat + end;
 }
@@ -571,9 +572,8 @@ function chooseFund(exclude) {
   const src = freeFav.length && Math.random() < .35 ? freeFav : free;
   return src.length ? pick(src) : null;
 }
-function slotTimes(n) {
+function slotTimes(n, day) {
   const [sh, sm] = cfg.start.split(':').map(Number), [eh, em] = cfg.end.split(':').map(Number);
-  const day = new Date(); day.setDate(day.getDate() + +$('day').value);
   const startT = new Date(day); startT.setHours(sh, sm, 0, 0);
   const endT = new Date(day); endT.setHours(eh, em, 0, 0);
   let from = startT.getTime();
@@ -587,22 +587,41 @@ function slotTimes(n) {
     return new Date(Math.round(t / 300e3) * 300e3);
   });
 }
+function startDay() {
+  const v = $('startDate').value;
+  if (v) { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); }
+  const t = new Date(); t.setDate(t.getDate() + 1); t.setHours(0, 0, 0, 0); return t;
+}
 async function generate() {
-  const n = Math.max(1, Math.min(20, parseInt($('howMany').value, 10) || 10));
-  const times = slotTimes(n);
-  if (!times) { toast(`Today's posting window (${cfg.start} to ${cfg.end}) is over. Pick tomorrow`); return; }
+  const perDay = Math.max(1, Math.min(20, parseInt($('howMany').value, 10) || 2));
+  const days = Math.max(1, Math.min(30, parseInt($('days').value, 10) || 1));
+  const first = startDay();
   try { await document.fonts.load('600 40px Geist'); await document.fonts.load('500 30px Geist'); } catch (e) {}
-  const usedSyms = new Set(), usedKeys = new Set(), out = [];
-  for (let i = 0; i < n; i++) {
-    // Mix in high-yield "per year" posts about 1 in 7 times
-    const hyFunds = highYieldPool(usedSyms);
-    const useAnnual = hyFunds.length && Math.random() < ANNUAL_SHARE;
-    const fund = useAnnual ? pick(hyFunds) : chooseFund(usedSyms); if (!fund) break;
-    const p = makePost(fund, useAnnual ? 'annual' : pickKind(fund), usedKeys); if (!p) { i--; usedSyms.add(fund.sym); continue; }
-    p.at = times[i]; usedSyms.add(fund.sym); if (p.fund2) usedSyms.add(p.fund2.sym); usedKeys.add(histKey(p)); out.push(p);
+  const usedKeys = new Set(), out = [];
+  let recent = [], skipped = 0;   // funds from the last couple of days, so one fund doesn't show up day after day
+  for (let d = 0; d < days; d++) {
+    const day = new Date(first); day.setDate(first.getDate() + d);
+    const times = slotTimes(perDay, day);
+    if (!times) { skipped++; continue; }
+    const usedSyms = new Set(recent.flat()), dayPosts = [];
+    let tries = 0;
+    while (dayPosts.length < perDay && tries++ < perDay * 30) {
+      // Mix in high-yield "per year" posts about 1 in 7 times
+      const hyFunds = highYieldPool(usedSyms);
+      const useAnnual = hyFunds.length && Math.random() < ANNUAL_SHARE;
+      let fund = useAnnual ? pick(hyFunds) : chooseFund(usedSyms);
+      if (!fund) { usedSyms.clear(); dayPosts.forEach(p => usedSyms.add(p.sym)); fund = chooseFund(usedSyms); if (!fund) break; }
+      const p = makePost(fund, useAnnual ? 'annual' : pickKind(fund), usedKeys);
+      if (!p) { usedSyms.add(fund.sym); continue; }
+      p.at = times[dayPosts.length]; usedSyms.add(fund.sym); if (p.fund2) usedSyms.add(p.fund2.sym); usedKeys.add(histKey(p)); dayPosts.push(p);
+    }
+    out.push(...dayPosts);
+    recent = [...recent.slice(-1), dayPosts.map(p => p.sym)];
   }
   state.drafts = out;
   renderDrafts();
+  if (!out.length) return toast(`Nothing left to schedule in that window (${cfg.start} to ${cfg.end}). Pick a later start date`);
+  if (skipped) toast(`Skipped ${skipped} day${skipped > 1 ? 's' : ''} whose posting window already passed`);
 }
 
 /* =====================================================================
@@ -610,6 +629,7 @@ async function generate() {
    ===================================================================== */
 const pad = v => String(v).padStart(2, '0');
 const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtWhen = d => d.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const KIND_LABEL = { annual: 'High yield: per year', lump: 'What it pays', goal: 'How much you need', growth: 'Growth over time', paysneeds: 'Pays vs needs (2 images)', nowlater: 'Today vs later (2 images)' };
 const OLD_KIND_LABEL = { versus: 'Head to head (2 images)' };
@@ -620,7 +640,7 @@ function renderDrafts() {
   $('schedBtn').disabled = !state.drafts.length;
   updateCost();
   if (!state.drafts.length) {
-    box.innerHTML = `<div class="empty">No drafts yet. Pick a day and click <b>Generate queue</b> to build ${esc($('howMany').value)} posts from today's yields.</div>`;
+    box.innerHTML = `<div class="empty">No drafts yet. Pick a start date and how many days, then click <b>Generate queue</b> to build posts from today's yields.</div>`;
     return;
   }
   state.drafts.sort((a, b) => a.at - b.at);
@@ -630,8 +650,8 @@ function renderDrafts() {
       <div class="pics${p.imgs.length > 1 ? ' pair' : ''}">${p.imgs.map((src, i) => `<img src="${src}" alt="Image ${i + 1} for ${esc(p.sym)} post">`).join('')}</div>
       <div class="side">
         <div class="meta">
-          <input type="time" value="${hhmm(p.at)}" data-act="time" aria-label="Post time">
-          <span>${p.at.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          <input type="datetime-local" value="${ymd(p.at)}T${hhmm(p.at)}" data-act="time" aria-label="Post date and time">
+          <span>${p.at.toLocaleDateString([], { weekday: 'short' })}</span>
           <span class="tag${hy ? ' hy' : ''}">$${esc(p.sym)} ${pct(p.fund.yield)}</span>
           ${p.fund2 ? `<span class="tag${p.fund2.yield >= HIGH_YIELD ? ' hy' : ''}">$${esc(p.fund2.sym)} ${pct(p.fund2.yield)}</span>` : ''}
           ${p.sent ? '<span class="tag">Sent to X</span>' : ''}
@@ -697,7 +717,7 @@ $('drafts').addEventListener('change', e => {
   const el = e.target, card = el.closest('.post'); if (!card) return;
   const p = state.drafts.find(d => d.id === card.dataset.id); if (!p) return;
   const act = el.dataset.act;
-  if (act === 'time') { const [h, m] = el.value.split(':').map(Number); const d = new Date(p.at); d.setHours(h, m, 0, 0); p.at = d; renderDrafts(); }
+  if (act === 'time') { if (!el.value) return; const [ds, ts] = el.value.split('T'), [y, mo, dd] = ds.split('-').map(Number), [h, m] = ts.split(':').map(Number); p.at = new Date(y, mo - 1, dd, h, m, 0, 0); renderDrafts(); }
   if (act === 'kind') {
     const used = new Set(state.drafts.filter(d => d !== p).map(histKey));
     const np = makePost(p.fund, el.value, used); if (!np) return toast('Every combo of that type has been used for this fund');
@@ -958,6 +978,7 @@ function toast(msg, ms = 4200) {
   document.body.appendChild(t); toastTimer = setTimeout(() => t.remove(), ms);
 }
 $('genBtn').addEventListener('click', generate);
+{ const t = new Date(), m = new Date(); m.setDate(m.getDate() + 1); $('startDate').min = ymd(t); $('startDate').value = ymd(m); }
 
 showSetup();
 state.history = new Set(manualHistory());
