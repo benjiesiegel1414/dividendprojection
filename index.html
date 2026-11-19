@@ -955,9 +955,76 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .intro .sentence .w { opacity: 1; transform: none; filter: none; }
 }
+/* =====================================================================
+   EXPLORE HUB + VIEWS (home shows the hero + tiles, each tile is its own page)
+   ===================================================================== */
+body[data-view="home"] [data-show]:not([data-show~="home"]),
+body[data-view="covers"] [data-show]:not([data-show~="covers"]),
+body[data-view="plan"] [data-show]:not([data-show~="plan"]),
+body[data-view="goal"] [data-show]:not([data-show~="goal"]),
+body[data-view="compare"] [data-show]:not([data-show~="compare"]),
+body[data-view="years"] [data-show]:not([data-show~="years"]),
+body[data-view="payouts"] [data-show]:not([data-show~="payouts"]),
+body[data-view="fund"] [data-show]:not([data-show~="fund"]) { display: none !important; }
+body[data-view="goal"] .goal-card { grid-column: span 8; }
+body[data-view="fund"] .fund-card { grid-column: span 12; }
+body[data-view="goal"] .work, body[data-view="fund"] .work { margin-top: 28px; }
+body:not([data-view="home"]) .hero { padding-top: 26px; }
+body:not([data-view="home"]) .sentence { font-size: clamp(26px, 3.4vw, 42px); }
+body:not([data-view="home"]) .stage { margin-top: 26px; }
+.crumbs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; font-size: 13.5px; color: var(--ink-3); }
+.crumbs a { color: var(--ink-2); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.crumbs a:hover { color: var(--green); }
+.crumbs b { color: var(--ink); font-weight: 600; }
+
+.hub { margin-top: 44px; }
+.hub-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 16px; flex-wrap: wrap; }
+.hub-head h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.1; }
+.hub-head p { margin: 6px 0 0; color: var(--ink-2); font-size: 15px; }
+.hub-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+.tile { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 168px; padding: 20px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); color: var(--ink); text-decoration: none; transition: transform .25s var(--ease-spring), box-shadow .25s, border-color .15s; overflow: hidden; }
+.tile:hover { transform: translateY(-3px); border-color: var(--green-2); box-shadow: 0 2px 6px rgba(11,31,26,.05), 0 22px 40px -22px rgba(11,122,85,.45); }
+.tile:focus-visible { outline: 3px solid var(--green-2); outline-offset: 2px; }
+.tile .em { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; background: var(--mint); font-size: 24px; line-height: 1; transition: transform .3s var(--ease-spring); }
+.tile:hover .em { transform: scale(1.08) rotate(-4deg); }
+.tile h3 { margin: 2px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.tile p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+.tile p b { color: var(--green); font-weight: 600; }
+.tile .go { margin-top: auto; margin-left: 0; opacity: 1; transform: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--green); }
+.tile .go i { font-style: normal; transition: transform .2s var(--ease-out); }
+.tile:hover .go i { transform: translateX(4px); }
+.tile.feat { grid-column: span 2; background: linear-gradient(150deg, var(--night) 0%, var(--night-2) 100%); border-color: transparent; color: var(--night-text); }
+.tile.feat .em { background: rgba(91,227,180,.14); }
+.tile.feat p { color: var(--night-muted); }
+.tile.feat p b, .tile.feat .go { color: var(--glow); }
+.bills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+.bills span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; font-size: 17px; background: rgba(208,240,226,.07); border: 1px solid rgba(208,240,226,.10); filter: grayscale(1); opacity: .45; transition: all .35s var(--ease-out); }
+.bills span.on { filter: none; opacity: 1; background: rgba(91,227,180,.16); border-color: rgba(91,227,180,.45); }
+.hub-more { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+.hub-more .tile { min-height: 0; flex-direction: row; align-items: center; gap: 14px; padding: 16px 18px; }
+.hub-more .tile .em { width: 40px; height: 40px; font-size: 20px; flex-shrink: 0; }
+.hub-more .tile h3 { font-size: 15.5px; margin: 0; }
+.hub-more .tile p { font-size: 13px; }
+.hub-more .tile .go { margin: 0 0 0 auto; }
+.tile.is-here { display: none; }
+body:not([data-view="home"]) .hub-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+body:not([data-view="home"]) .tile.feat { grid-column: span 1; }
+.grid > .hub.wrap { grid-column: span 12; max-width: none; width: auto; margin: 24px 0 0; padding-left: 0; padding-right: 0; }
+@media (max-width: 1040px) { .hub-grid, body:not([data-view="home"]) .hub-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } .hub-more { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 640px) {
+  .hub { margin-top: 34px; }
+  .hub-grid { gap: 10px; }
+  .tile { min-height: 150px; padding: 16px; border-radius: 18px; gap: 8px; }
+  .tile .em { width: 40px; height: 40px; font-size: 21px; border-radius: 12px; }
+  .tile h3 { font-size: 15.5px; }
+  .tile p { font-size: 13px; }
+  .bills span { width: 30px; height: 30px; font-size: 15px; }
+  body[data-view="goal"] .goal-card { grid-column: span 12; }
+}
+@media (max-width: 1040px) { body[data-view="goal"] .goal-card { grid-column: span 12; } }
 </style>
 </head>
-<body class="intro">
+<body class="intro" data-view="home">
 
 <div class="topnote" role="note"><div class="wrap"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg><span>For education only, not financial advice. Projections are hypothetical and assume a flat share price. <a href="/disclaimer">Read the disclaimer</a></span></div></div>
 <header class="site-header" id="siteHeader">
@@ -969,10 +1036,10 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       DividendProjection
     </a>
     <nav class="nav" aria-label="Main">
-      <a class="nav-hide" href="#covers">What it covers</a>
-      <a class="nav-hide" href="#plan">Your plan</a>
-      <a class="nav-hide" href="#compare">Compare funds</a>
-      <a class="nav-hide" href="#years">Year by year</a>
+      <a class="nav-hide" href="/what-it-covers/" data-tile="covers">What it covers</a>
+      <a class="nav-hide" href="/your-plan/" data-tile="plan">Your plan</a>
+      <a class="nav-hide" href="/compare-funds/" data-tile="compare">Compare funds</a>
+      <a class="nav-hide" href="/year-by-year/" data-tile="years">Year by year</a>
       <a class="nav-hide" href="/etf/">ETFs</a>
       <a class="nav-hide" href="/blog/">Blog</a>
       <a class="nav-pro" href="https://topdividendetfspro.com/" target="_blank" rel="noopener">PRO terminal</a>
@@ -984,6 +1051,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
   <noscript><p class="wrap" style="padding-top:20px">DividendProjection is a free dividend ETF calculator. Please turn on JavaScript to project your dividend income with live yields for 150+ dividend ETFs.</p></noscript>
   <section class="hero wrap loading" id="hero">
     <p class="notice" id="notice" hidden></p>
+    <nav class="crumbs" aria-label="Breadcrumb" data-show="covers plan goal compare years payouts fund"><a href="/" id="crumbHome"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>Dividend calculator</a><span aria-hidden="true">/</span><b id="crumbHere">&nbsp;</b></nav>
     <div class="hero-top">
       <h1 class="hero-h1" id="pageH1">Dividend ETF income calculator</h1>
       <a class="eyebrow-live" href="https://topdividendetfspro.com/" target="_blank" rel="noopener"><i class="dot-live" aria-hidden="true"></i><span>Data sourced from <b>TopDividendETFsPRO.com</b></span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5h5.5V8M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -991,7 +1059,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 
     <p class="sentence">
       <span class="w" style="--i:0">If</span> <span class="w" style="--i:1">I</span> <span class="w" style="--i:2">invest</span>
-      <span class="w" style="--i:3"><label class="token"><span>$</span><input id="start" type="text" inputmode="numeric" value="10,000" aria-label="Starting amount in dollars"></label></span>
+      <span class="w" style="--i:3"><label class="token"><span>$</span><input id="start" type="text" inputmode="numeric" value="25,000" aria-label="Starting amount in dollars"></label></span>
       <span class="w" style="--i:4">today</span> <span class="w" style="--i:5">and</span> <span class="w" style="--i:6">add</span>
       <span class="w" style="--i:7"><label class="token"><span>$</span><input id="monthly" type="text" inputmode="numeric" value="500" aria-label="Monthly deposit in dollars"></label></span>
       <span class="w" style="--i:8">a</span> <span class="w" style="--i:9">month</span> <span class="w" style="--i:10">into</span>
@@ -1043,7 +1111,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
         </dl>
       </div>
 
-      <div class="stage-grid">
+      <div class="stage-grid" data-show="payouts">
         <div class="sg-head">
           <h2 id="dotsTitle">Every payout you'd receive</h2>
           <p><span id="dotsLegend">Each dot is one payout</span><span class="sg-scale" aria-hidden="true"><i style="width:4px;height:4px"></i><i style="width:7px;height:7px"></i><i style="width:10px;height:10px"></i></span><span>bigger pays more</span></p>
@@ -1054,7 +1122,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
         </div>
       </div>
 
-      <div class="stage-actions">
+      <div class="stage-actions" data-show="home payouts">
         <button type="button" class="btn-night primary" id="shareImg">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1"/></svg>
           Download share image
@@ -1071,28 +1139,84 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
     </section>
   </section>
 
+  <section class="hub wrap" id="hub" aria-labelledby="hubTitle">
+    <div class="hub-head">
+      <div><h2 id="hubTitle">Explore your projection</h2><p id="hubSub">Every tile opens a deeper look at the same plan. Your numbers come with you.</p></div>
+    </div>
+    <div class="hub-grid">
+      <a class="tile feat" data-tile="covers" href="/what-it-covers/">
+        <span class="em" aria-hidden="true">🧾</span>
+        <h3>What it covers</h3>
+        <p id="tCovers">See which everyday bills your dividends could pay.</p>
+        <div class="bills" id="tBills" aria-hidden="true"></div>
+        <span class="go">See your bills <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="plan" href="/your-plan/">
+        <span class="em" aria-hidden="true">🛠️</span>
+        <h3>Your plan</h3>
+        <p id="tPlan">Tune reinvesting, taxes and dividend growth.</p>
+        <span class="go">Tune it <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="goal" href="/income-goal/">
+        <span class="em" aria-hidden="true">🎯</span>
+        <h3>Income goal</h3>
+        <p id="tGoal">Find the year you hit your monthly goal.</p>
+        <span class="go">Set a goal <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="compare" href="/compare-funds/">
+        <span class="em" aria-hidden="true">⚖️</span>
+        <h3>Compare funds</h3>
+        <p id="tCompare">Run the same plan through similar funds.</p>
+        <span class="go">Compare <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="years" href="/year-by-year/">
+        <span class="em" aria-hidden="true">📅</span>
+        <h3>Year by year</h3>
+        <p id="tYears">Every year of the plan, row by row.</p>
+        <span class="go">Open the table <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="payouts" href="/every-payout/">
+        <span class="em" aria-hidden="true">🔵</span>
+        <h3>Every payout</h3>
+        <p id="tPayouts">Each dividend you'd collect, as a dot.</p>
+        <span class="go">See the payouts <i>→</i></span>
+      </a>
+      <a class="tile" data-tile="fund" href="/fund-facts/">
+        <span class="em" aria-hidden="true">🏷️</span>
+        <h3 id="tFundH">About the fund</h3>
+        <p id="tFund">Yield, fees, tax grade and rating.</p>
+        <span class="go">Fund facts <i>→</i></span>
+      </a>
+    </div>
+    <div class="hub-more">
+      <a class="tile" data-tile="etfs" href="/etf/"><span class="em" aria-hidden="true">📚</span><div><h3>ETF guides</h3><p>Deep dives on $SCHD, $JEPI, $QQQI and more</p></div><span class="go"><i>→</i></span></a>
+      <a class="tile" data-tile="blog" href="/blog/"><span class="em" aria-hidden="true">📰</span><div><h3>Blog</h3><p>Dividend reviews, payouts and guides</p></div><span class="go"><i>→</i></span></a>
+      <a class="tile" data-tile="pro" href="https://topdividendetfspro.com/" target="_blank" rel="noopener"><span class="em" aria-hidden="true">💎</span><div><h3>PRO terminal</h3><p>Rank 150+ funds by yield, tax grade and return</p></div><span class="go"><i>→</i></span></a>
+    </div>
+  </section>
+
   <div class="wrap">
-    <div class="section-title cover-head" id="covers">
+    <div class="section-title cover-head" id="covers" data-show="covers">
       <div><h2>What your dividends could pay for</h2><p id="coverSub">Your projected dividend income next to what Americans typically pay each month. Drag the slider to see any year, or tap an amount to use your own.</p></div>
       <div class="cover-ctrl">
         <div class="cover-year"><label for="coverYear">Year <b id="coverYearVal">20</b></label><input type="range" id="coverYear" min="1" max="20" step="1" value="20" aria-label="Year to show"></div>
       </div>
     </div>
 
-    <div class="card cover-summary">
+    <div class="card cover-summary" data-show="covers">
       <p id="coverLine">&nbsp;</p>
       <div class="cover-dots" id="coverDots" aria-hidden="true"></div>
     </div>
-    <div class="cover-grid" id="coverGrid"></div>
-    <p class="cover-sources" id="coverSources"></p>
+    <div class="cover-grid" id="coverGrid" data-show="covers"></div>
+    <p class="cover-sources" id="coverSources" data-show="covers"></p>
 
-    <div class="section-title" id="plan">
+    <div class="section-title" id="plan" data-show="plan">
       <div><h2>Tune your plan</h2><p>Change anything here and every number on the page updates instantly.</p></div>
     </div>
 
-    <div class="grid work">
+    <div class="grid work" data-show="plan goal fund">
       <!-- Chart -->
-      <section class="card chart-card" aria-labelledby="chartTitleH">
+      <section class="card chart-card" aria-labelledby="chartTitleH" data-show="plan">
         <div class="card-head">
           <div><h2 id="chartTitleH">Your income, year by year</h2><p id="chartSubtitle">Monthly dividend income at the end of each year</p></div>
           <div class="seg" id="mode" role="group" aria-label="Chart view">
@@ -1110,7 +1234,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       </section>
 
       <!-- Settings -->
-      <aside class="card settings" aria-labelledby="setTitle">
+      <aside class="card settings" aria-labelledby="setTitle" data-show="plan goal">
         <div class="card-head"><div><h2 id="setTitle">Plan settings</h2><p>Defaults reset every time you pick a fund</p></div></div>
         <div class="card-body">
           <div class="row first toggle-row" id="dripRow">
@@ -1158,7 +1282,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       </aside>
 
       <!-- Bento -->
-      <div class="bento">
+      <div class="bento" data-show="plan">
         <div class="card stat">
           <span class="k">Where your balance comes from</span>
           <strong id="bBal">$0</strong>
@@ -1186,7 +1310,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       </div>
 
       <!-- Goal -->
-      <section class="card goal-card" aria-labelledby="goalTitle">
+      <section class="card goal-card" aria-labelledby="goalTitle" data-show="goal">
         <div class="card-head"><div><h2 id="goalTitle">Your income goal</h2><p>When each monthly income level is reached</p></div></div>
         <div class="card-body">
           <div class="goal-ring">
@@ -1205,7 +1329,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       </section>
 
       <!-- Fund -->
-      <section class="card fund-card" aria-labelledby="fundTitle">
+      <section class="card fund-card" aria-labelledby="fundTitle" data-show="fund">
         <div class="card-head"><div><h2 id="fundTitle">About this fund</h2><p>Live data from the TopDividendETFs PRO database</p></div></div>
         <div class="card-body">
           <div class="fund-hero"><div class="fund-badge" id="fundBadge">—</div><div><h3 id="fundName">Loading…</h3><p id="fundProv">&nbsp;</p></div></div>
@@ -1215,12 +1339,12 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
       </section>
     </div>
 
-    <div class="section-title" id="compare">
+    <div class="section-title" id="compare" data-show="compare">
       <div><h2>Same plan, other funds</h2><p id="peersSub">Your exact plan with the funds closest in yield. Select any fund to switch.</p></div>
     </div>
 
     <div class="grid">
-      <section class="card peers-card" aria-label="Similar funds">
+      <section class="card peers-card" aria-label="Similar funds" data-show="compare">
         <div class="card-body" style="padding:14px 8px 4px;">
           <div class="table-scroll">
             <table class="peers-table">
@@ -1232,7 +1356,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
         <div class="chips" id="popular"></div>
       </section>
 
-      <section class="card years-card" id="years">
+      <section class="card years-card" id="years" data-show="years">
         <details>
           <summary>
             <div><h2>Year-by-year breakdown</h2><p>Every year of the plan, with your goal year highlighted</p></div>
@@ -1249,7 +1373,7 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
 
 
       <!-- ============ GUIDE + FAQ (plain HTML so search engines can read it) ============ -->
-      <section class="guide" id="guide" aria-labelledby="guideTitle">
+      <section class="guide" id="guide" aria-labelledby="guideTitle" data-show="home">
         <div class="guide-head">
           <p class="guide-eyebrow">Dividend calculator guide</p>
           <h2 id="guideTitle">How to project your dividend income</h2>
@@ -1371,9 +1495,21 @@ kbd { font-family: var(--font); font-size: 12px; color: var(--ink-3); border: 1p
    ===================================================================== */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTxCiod-Cwry7E6k9Un9dgrM_ANymC36_IO_wLyNj-YDo2KI7mp_1ZzyNBnBGZOxT48QPM8TCwtsmA4/pub?gid=0&single=true&output=csv";
 const SITE = "https://dividendprojection.com/";
+// Each explore tile is its own page built from this file (scripts/build-views.js sets data-view)
+const VIEW = document.body.dataset.view || 'home';
+const VIEWS = {
+  covers:  { slug: 'what-it-covers', name: 'What it covers' },
+  plan:    { slug: 'your-plan',      name: 'Your plan' },
+  goal:    { slug: 'income-goal',    name: 'Income goal' },
+  compare: { slug: 'compare-funds',  name: 'Compare funds' },
+  years:   { slug: 'year-by-year',   name: 'Year by year' },
+  payouts: { slug: 'every-payout',   name: 'Every payout' },
+  fund:    { slug: 'fund-facts',     name: 'Fund facts' }
+};
+const BASE = VIEW === 'home' ? '/' : '/' + VIEWS[VIEW].slug + '/';
 const DEFAULT_TICKER = "SCHD";
 // Money settings carry over when you switch funds. Dividend growth and yield do not.
-const DEFAULTS = { a: 10000, m: 500, y: 20, d: 1, acct: 'taxable', t: 0, ci: 0, goal: 2000, g: 0 };
+const DEFAULTS = { a: 25000, m: 500, y: 20, d: 1, acct: 'taxable', t: 0, ci: 0, goal: 2000, g: 0 };
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -1542,7 +1678,7 @@ function stateParams(sym, forShare) {
   }
   return p;
 }
-const fundHref = sym => '/?' + stateParams(sym, false).toString();
+const fundHref = sym => BASE + '?' + stateParams(sym, false).toString();
 const goTo = sym => { track('fund_switched', { to_etf: sym, source: 'search' }); location.href = fundHref(sym); };
 
 /* Inline sentence inputs size themselves to their content */
@@ -1693,7 +1829,8 @@ function render() {
   if (typeof renderCovers === 'function') { if (cover.pending) { cover.pending = false; autoPlayCovers(); } else renderCovers(); }
   chartTo(); dotsTo();
   // The bare homepage keeps a clean address until the visitor interacts
-  if (!demo.running && !demo.pristine) history.replaceState(null, '', '/?' + stateParams(fund.sym, true).toString());
+  if (!demo.running && !demo.pristine) history.replaceState(null, '', BASE + '?' + stateParams(fund.sym, true).toString());
+  renderHub(o, res, goalRow);
   firstRender = false;
 }
 
@@ -1745,6 +1882,7 @@ function renderPeers(o) {
     const r = project({ ...(f === fund ? o : base), yield: f === fund ? o.yield : f.yield, periods: f.periods }).rows;
     return { f, inc: r[r.length - 1].monthlyInc };
   }).sort((a, b) => b.inc - a.inc);
+  state.peers = list;
   const max = Math.max(...list.map(x => x.inc), 1);
   $('peersSub').textContent = `Your exact plan with the funds closest in yield, showing monthly income in year ${o.years}. Select any fund to switch.`;
   $('peersBody').innerHTML = list.map(x => {
@@ -2387,13 +2525,13 @@ $('riskActions').addEventListener('click', e => {
    ===================================================================== */
 // Each stop in the homepage demo: a fund and a starting amount to show with it
 const DEMO_STEPS = [
-  { t: 'SCHD', a: 10000 },
-  { t: 'OVL',  a: 50000 },
+  { t: 'SCHD', a: 25000 },
+  { t: 'OVL',  a: 25000 },
   { t: 'SPYI', a: 25000 },
-  { t: 'KQQQ', a: 15000 },
-  { t: 'VIG',  a: 100000 },
-  { t: 'SGOV', a: 75000 },
-  { t: 'QQQI', a: 30000 }
+  { t: 'KQQQ', a: 25000 },
+  { t: 'VIG',  a: 25000 },
+  { t: 'SGOV', a: 25000 },
+  { t: 'QQQI', a: 25000 }
 ];
 const demo = { running: false, timer: null, i: 0, list: [], pristine: !params.has('etf') };
 function markInteracted(e) {
@@ -2439,7 +2577,7 @@ function flipTokenTo(f, amount, years) {
   }, 320);
 }
 function startTickerDemo() {
-  if (params.has('etf') || reduceMotion) return;
+  if (params.has('etf') || reduceMotion || VIEW !== 'home') return;
   demo.list = DEMO_STEPS.map(st => ({ f: state.funds.find(f => f.sym === st.t), a: st.a, y: st.y })).filter(x => x.f);
   if (demo.list.length < 2) return;
   demo.i = Math.max(0, demo.list.findIndex(x => x.f === state.fund));
@@ -2477,6 +2615,54 @@ function stopTickerDemo() {
   $('fundBtn').classList.remove('demo');
 }
 
+
+/* =====================================================================
+   EXPLORE HUB: live teasers on every tile, links carry the visitor's plan
+   ===================================================================== */
+const BILL_EMOJI = { phone: '📱', power: '⚡', ins: '🛡️', food: '🛒', car: '🚗', rent: '🏠', ss: '👴', salary: '💼' };
+function renderHub(o, res, goalRow) {
+  const fund = state.fund; if (!fund) return;
+  const rows = res.rows, end = rows[rows.length - 1], N = o.years;
+  const q = '?' + stateParams(fund.sym, true).toString();
+  document.querySelectorAll('[data-tile]').forEach(a => {
+    const v = VIEWS[a.dataset.tile]; if (!v) return;
+    a.href = '/' + v.slug + '/' + q;
+    a.classList.toggle('is-here', a.dataset.tile === VIEW && a.classList.contains('tile'));
+  });
+  $('crumbHome').href = '/' + q;
+  const inc = end.monthlyInc;
+  const covered = EXPENSES.filter(e => e.amt > 0 && inc >= e.amt).length;
+  $('tCovers').innerHTML = covered === EXPENSES.length
+    ? `In year ${N}, ${money(inc)} a month could pay <b>all ${EXPENSES.length}</b> everyday bills, even a full salary. See how fast.`
+    : covered === 0 ? `In year ${N}, ${money(inc)} a month is on its way to your first bill. See which one goes first.`
+    : `In year ${N}, ${money(inc)} a month could fully pay <b>${covered} of ${EXPENSES.length}</b> everyday bills. Which ones?`;
+  $('tBills').innerHTML = EXPENSES.map(e => `<span class="${e.amt > 0 && inc >= e.amt ? 'on' : ''}" title="${esc(e.name)}">${BILL_EMOJI[e.id] || '💵'}</span>`).join('');
+  const yoc = end.putIn > 0 ? end.annual / end.putIn * 100 : 0;
+  $('tPlan').innerHTML = `<b>${pct(yoc, 1)}</b> yield on cost by year ${N}. Try reinvesting, taxes and growth.`;
+  $('tGoal').innerHTML = !o.goal ? 'Pick a monthly income goal and see when you get there.'
+    : goalRow ? `<b>${usd0.format(o.goal)} a month</b> arrives in year ${goalRow.year}. What about ${usd0.format(o.goal * 2)}?`
+    : `You'd be <b>${Math.round(Math.min(inc / o.goal, 1) * 100)}%</b> of the way to ${usd0.format(o.goal)} a month.`;
+  const best = (state.peers || []).find(x => x.f.sym !== fund.sym);
+  $('tCompare').innerHTML = best ? `<b>$${esc(best.f.sym)}</b> would pay ${money(best.inc)} a month on this exact plan.` : 'Run the same plan through similar funds.';
+  $('tYears').innerHTML = `<b>${usd0.format(end.value)}</b> balance after ${N} ${N === 1 ? 'year' : 'years'}. See every year.`;
+  $('tPayouts').innerHTML = `<b>${(N * o.periods).toLocaleString()}</b> payouts. The last one is ${money(end.annual / o.periods)}.`;
+  $('tFundH').textContent = `About $${fund.sym}`;
+  $('tFund').innerHTML = `<b>${pct(fund.yield)}</b> yield${fund.er !== null ? `, ${pct(fund.er)} expense ratio` : ''}. Paid ${payWord(o.periods)}.`;
+}
+if (VIEW !== 'home') {
+  const pro = document.querySelector('main .pro');
+  if (pro) pro.before($('hub'));
+  $('hubTitle').textContent = 'Keep exploring';
+  $('hubSub').textContent = 'Same plan, a different angle. Your numbers come with you.';
+  if (VIEW === 'years') { const d = document.querySelector('.years-card details'); if (d) d.open = true; }
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-tile]');
+  if (!a) return;
+  const tiles = [...document.querySelectorAll('.tile[data-tile]')];
+  track('tile_clicked', { tile: a.dataset.tile, from_page: VIEW, placement: a.closest('.nav') ? 'header' : a.closest('.hub-more') ? 'more' : 'hub', position: tiles.indexOf(a) + 1 });
+}, true);
+
 /* =====================================================================
    ANALYTICS EVENTS (GA4)
    Engagement events, separate from page views. Sent through the Google tag at
@@ -2486,7 +2672,7 @@ function stopTickerDemo() {
 const counts = { plan: 0 };
 function track(name, params = {}) {
   if (typeof window.gtag !== 'function') return;
-  gtag('event', name, { etf: state.fund ? state.fund.sym : '', transport_type: 'beacon', ...params });
+  gtag('event', name, { etf: state.fund ? state.fund.sym : '', page_type: VIEW, transport_type: 'beacon', ...params });
 }
 // One event per setting per burst of changes, so typing "10000" or tapping +++ counts once
 const planTimers = {};
@@ -2540,6 +2726,14 @@ document.addEventListener('click', e => {
    BOOT
    ===================================================================== */
 function setMeta(f, isFundPage) {
+  if (VIEW !== 'home') {
+    $('crumbHere').textContent = VIEW === 'fund' ? `About ${f.sym}` : VIEWS[VIEW].name;
+    if (isFundPage) {
+      document.title = `${f.sym} ${VIEWS[VIEW].name}: Dividend Income Projection | DividendProjection`;
+      $('pageH1').textContent = `${f.sym} ${VIEWS[VIEW].name.toLowerCase()}`;
+    }
+    return;
+  }
   if (!isFundPage) {   // bare homepage or unknown ticker: keep the homepage title and canonical
     $('canonical').href = SITE;
     document.querySelector('meta[property="og:url"]').content = SITE;
