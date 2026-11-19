@@ -1,0 +1,40 @@
+name: Build explore pages
+
+# Rebuilds /what-it-covers/, /your-plan/, /income-goal/, /compare-funds/,
+# /year-by-year/, /every-payout/ and /fund-facts/ from index.html whenever it changes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "scripts/build-views.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-bots
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build explore pages from index.html
+        run: node scripts/build-views.js
+      - name: Save changes
+        run: |
+          git config user.name "benjiesiegel1414"
+          git config user.email "benjiesbusiness@gmail.com"
+          git add what-it-covers your-plan income-goal compare-funds year-by-year every-payout fund-facts sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Build explore pages [skip ci]"
+            for i in 1 2 3 4 5; do git pull --rebase && git push && break; sleep 10; done
+          fi
